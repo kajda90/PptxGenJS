@@ -124,10 +124,51 @@ var PptxGenJS = function(){
 		slide: {},
 		name: '[ default ]',
 		data: [],
+		placeholders: [],
 		rels: [],
 		slideNumberObj: null
 	};
 	var LAYOUT_IDX_SERIES_BASE = 2147483649;
+	
+	// NEW Start
+	var PLACEHOLDERS = {
+		title: {
+			type: 'title',
+			objectName: 'Title Placeholder',
+			objectType: 'title'
+		},
+		ctrTitle: {
+			type: 'ctrTitle',
+			objectName: 'Center Title Placeholder',
+			objectType: 'ctrTitle'
+		},
+		subTitle: {
+			type: 'subTitle',
+			objectName: 'Sub Title Placeholder',
+			objectType: 'subTitle'
+		},
+		table: {
+			type: 'table',
+			objectName: 'Table Placeholder',
+			objectType: 'tbl'
+		},
+		chart: {
+			type: 'chart',
+			objectName: 'Chart Placeholder',
+			objectType: 'chart'
+		},
+		image: {
+			type: 'image',
+			objectName: 'Image Placeholder',
+			objectType: 'pic'
+		},
+		media: {
+			type: 'media',
+			objectName: 'Media Placeholder',
+			objectType: 'media'
+		}
+	};
+	// New End
 
 	// A: Create internal pptx object
 	var gObjPptx = {};
@@ -385,6 +426,33 @@ var PptxGenJS = function(){
 			target.data.push(resultObject);
 			return resultObject;
 		},
+		
+		addPlaceholderDefinition: function(index, layoutPlaceholder, target) {
+			if (!PLACEHOLDERS.hasOwnProperty(layoutPlaceholder.type)) {
+				throw Error('Wrong type of placeholder');
+			}
+
+			var idx = index + 1,
+				id = target.data.length + idx + 1;
+		
+			var placeholder = {
+				id: id,
+				idx: idx,
+				type: layoutPlaceholder.type,
+				name: layoutPlaceholder.name,
+				objectType: PLACEHOLDERS[layoutPlaceholder.type].objectType,
+				objectName: PLACEHOLDERS[layoutPlaceholder.type].objectName,
+				options: layoutPlaceholder.options || {}
+			};
+
+			if (layoutPlaceholder.hasOwnProperty('text')) {
+				placeholder.text = layoutPlaceholder.text;
+			}
+			
+			target.placeholders.push(placeholder);
+
+			return placeholder;
+		},
 
 		/**
 		 * Generate the chart based on input data.
@@ -550,6 +618,17 @@ var PptxGenJS = function(){
 			if ( slideDef.slideNumber && typeof slideDef.slideNum ) {
 				target.slideNumberObj = slideDef.slideNumber;
 			};
+			
+			// New Start
+			// Add Slide Placeholders
+			if (slideDef.placeholders && Array.isArray(slideDef.placeholders) && slideDef.placeholders.length > 0) {
+				slideDef.placeholders.forEach(function(object, idx) {
+					if (object.type && PLACEHOLDERS[object.type]) {
+						gObjPptxGenerators.addPlaceholderDefinition(idx, object, target);
+					}
+				});
+			}
+			// NEW End
 		},
 
 		/**
@@ -1041,6 +1120,63 @@ var PptxGenJS = function(){
 				strSlideXml += '</p:sp>';
 			}
 
+			slideObject.placeholders.forEach(function(placeholderObj, idx) {
+				let x = 0,
+					y = 0,
+					cx = getSmartParseNumber('75%', 'X'),
+					cy = 0;
+
+				let locationAttr = "",
+					shapeType = null,
+					size = '';
+
+				// A: Set option vars
+				placeholderObj.options = placeholderObj.options || {};
+
+				if (placeholderObj.options.w || placeholderObj.options.w == 0) placeholderObj.options.cx = placeholderObj.options.w;
+				if (placeholderObj.options.h || placeholderObj.options.h == 0) placeholderObj.options.cy = placeholderObj.options.h;
+				//
+				if (placeholderObj.options.x || placeholderObj.options.x == 0) x = getSmartParseNumber(placeholderObj.options.x, 'X');
+				if (placeholderObj.options.y || placeholderObj.options.y == 0) y = getSmartParseNumber(placeholderObj.options.y, 'Y');
+				if (placeholderObj.options.cx || placeholderObj.options.cx == 0) cx = getSmartParseNumber(placeholderObj.options.cx, 'X');
+				if (placeholderObj.options.cy || placeholderObj.options.cy == 0) cy = getSmartParseNumber(placeholderObj.options.cy, 'Y');
+				//
+				if (placeholderObj.options.shape) shapeType = getShapeInfo(placeholderObj.options.shape);
+				//
+				if (placeholderObj.options.flipH) locationAttr += ' flipH="1"';
+				if (placeholderObj.options.flipV) locationAttr += ' flipV="1"';
+				if (placeholderObj.options.rotate) locationAttr += ' rot="' + convertRotationDegrees(placeholderObj.options.rotate) + '"';
+
+				strSlideXml += '<p:sp>';
+				strSlideXml += ' <p:nvSpPr>';
+				strSlideXml += '  <p:cNvPr id="' + placeholderObj.id + '" name="' + placeholderObj.objectName + ' ' + placeholderObj.idx + '"/>';
+				strSlideXml += '    <p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr>';
+				strSlideXml += '   <p:nvPr>';
+				strSlideXml += '   <p:ph' + (placeholderObj.type != PLACEHOLDERS['title'].type ? ' idx="' + placeholderObj.idx + '"' : '') + ' type="' + placeholderObj.objectType + '"/>';
+				strSlideXml += '  </p:nvPr>';
+				strSlideXml += ' </p:nvSpPr>';
+				strSlideXml += ' <p:spPr><a:xfrm' + locationAttr + '>';
+				strSlideXml += '  <a:off x="' + x + '" y="' + y + '"/>';
+				strSlideXml += '  <a:ext cx="' + cx + '" cy="' + cy + '"/></a:xfrm>';
+				strSlideXml += ' </p:spPr>';
+
+				if (placeholderObj.hasOwnProperty('text')) {
+					strSlideXml += ' <p:txBody>';
+					strSlideXml += '  <a:bodyPr anchor="ctr"/>';
+					strSlideXml += '  <a:lstStyle />';
+					strSlideXml += '  <a:p>';
+					strSlideXml += '   <a:r>';
+					strSlideXml += '    <a:rPr lang="en-US" smtClean="0"/>';
+					strSlideXml += '    <a:t>' + placeholderObj.text + '</a:t>'
+					strSlideXml += '   </a:r>';
+					strSlideXml += '   <a:endParaRPr lang="en-US"/>';
+					strSlideXml += '  </a:p>';
+					strSlideXml += ' </p:txBody>';
+				}
+
+				strSlideXml += '</p:sp>';
+			});
+
 			// STEP 6: Close spTree and finalize slide XML
 			strSlideXml += '</p:spTree>';
 			/* FIXME: Remove this in 2.0.0 (commented for 1.6.0)
@@ -1377,7 +1513,7 @@ var PptxGenJS = function(){
 		// Create a Layout/Master/Rel/Slide file for each SLIDE
 		for ( var idx=0; idx<gObjPptx.slides.length; idx++ ) {
 			intSlideNum++;
-			zip.file("ppt/slides/slide"+ intSlideNum +".xml", makeXmlSlide(gObjPptx.slides[idx]));
+			zip.file("ppt/slides/slide"+ intSlideNum +".xml", makeXmlSlide(gObjPptx.slides[idx], intSlideNum));
 			zip.file("ppt/slides/_rels/slide"+ intSlideNum +".xml.rels", makeXmlSlideRel( intSlideNum ));
 			if ( !gObjPptx.properLayoutMasterInUse ) {
 				zip.file("ppt/slideLayouts/slideLayout"+ intSlideNum +".xml", makeXmlSlideLayout( intSlideNum ));
@@ -1412,10 +1548,10 @@ var PptxGenJS = function(){
 				if ( callback ) {
 					if ( strExportName.indexOf('http') == 0 ) {
 						zip.generateAsync({type:'nodebuffer'}).then(function(content){ callback(content); });
-					}
+						}
 					else {
 						zip.generateAsync({type:'nodebuffer'}).then(function(content){ fs.writeFile(strExportName, content, callback(strExportName)); });
-					}
+				}
 				}
 				else
 					zip.generateAsync({type:'nodebuffer'}).then(function(content){ fs.writeFile(strExportName, content); });
@@ -1502,7 +1638,7 @@ var PptxGenJS = function(){
 			catch(ex) {
 				console.error('ERROR: Unable to read image: '+inImgUrl);
 				return { width:0, height:0 };
-			}
+		}
 		}
 
 		// A: Create
@@ -1665,8 +1801,8 @@ var PptxGenJS = function(){
 	}
 
 	/**
-	* Magic happens here
-	*/
+	 * Magic happens here
+	 */
 	function parseTextToLines(cell, inWidth) {
 		var CHAR = 2.2 + (cell.opts && cell.opts.lineWeight ? cell.opts.lineWeight : 0); // Character Constant (An approximation of the Golden Ratio)
 		var CPL = (inWidth*EMU / ( (cell.opts.font_size || DEF_FONT_SIZE)/CHAR )); // Chars-Per-Line
@@ -1703,8 +1839,8 @@ var PptxGenJS = function(){
 	}
 
 	/**
-	* Magic happens here
-	*/
+	 * Magic happens here
+	 */
 	function getSlidesForTableRows(inArrRows, opts) {
 		var LINEH_MODIFIER = 1.9;
 		var opts = opts || {};
@@ -1750,7 +1886,7 @@ var PptxGenJS = function(){
 		if ( !opts.w && opts.colW ) {
 			if ( Array.isArray(opts.colW) ) opts.colW.forEach(function(val,idx){ opts.w += val });
 			else { opts.w = opts.colW * numCols }
-		}
+			}
 
 		// STEP 2: Calc usable space/table size now that we have usable space calc'd
 		emuSlideTabW = ( opts.w ? inch2Emu(opts.w) : (gObjPptx.pptLayout.width - inch2Emu((opts.x || arrInchMargins[1]) + arrInchMargins[3])) );
@@ -1769,8 +1905,8 @@ var PptxGenJS = function(){
 			else {
 				opts.colW = [];
 				for (var iCol=0; iCol<numCols; iCol++) { opts.colW.push( (emuSlideTabW/EMU/numCols) ); }
+				}
 			}
-		}
 
 		// STEP 4: Iterate over each line and perform magic =========================
 		// NOTE: inArrRows will be an array of {text:'', opts{}} whether from `addSlidesForTable()` or `.addTable()`
@@ -1872,10 +2008,10 @@ var PptxGenJS = function(){
 								headRow.push({ text:cell.text, opts:cell.opts });
 								var lines = parseTextToLines(cell,(opts.colW[iCell]/ONEPT));
 								if ( lines.length > intMaxLineCnt ) { intMaxLineCnt = lines.length; intMaxColIdx = iCell; }
-							});
+								});
 							arrRows.push( $.extend(true, [], headRow) );
+								}
 						}
-					}
 
 					// B: Add next line of text to this cell
 					if ( arrCellsLines[col][idx] ) currRow[col].text += arrCellsLines[col][idx];
@@ -2043,6 +2179,36 @@ var PptxGenJS = function(){
 			}
 		});
 	}
+	
+	// NEW Start
+	/**
+	 * @param {String} Name of placeholder defined in concrete layout object
+	 * @param {Number} Index of layout
+	 * @return {Object} Object of a placeholder
+	 */
+	function getPlaceholder(placeholderName, layoutIdx) {
+		var placeholder = null;
+
+		if (gObjPptx.properLayoutMasterInUse && placeholderName && layoutIdx) {
+			layoutIdx = layoutIdx - 1;
+			var layout = gObjPptx.layoutDefinitions[layoutIdx];
+
+			if (!layout) {
+				throw Error('Layout not found by idx ' + layoutIdx);
+			}
+
+			if (gObjPptx.layoutDefinitions[layoutIdx] && Array.isArray(gObjPptx.layoutDefinitions[layoutIdx].placeholders)) {
+				placeholder = gObjPptx.layoutDefinitions[layoutIdx].placeholders.find(function(placeholder) {
+					return placeholder.name && placeholder.name == placeholderName;
+				}) || placeholder;
+			} else {
+				throw Error('Any placeholders are not defined for layout "' + layout.name + '"');
+			}
+		}
+
+		return placeholder;
+	};
+	// NEW End
 
 	/* =======================================================================================================
 	|
@@ -2058,8 +2224,8 @@ var PptxGenJS = function(){
 	*/
 
 	/**
-	* @see: http://www.datypic.com/sc/ooxml/s-dml-chart.xsd.html
-	*/
+	 * @see: http://www.datypic.com/sc/ooxml/s-dml-chart.xsd.html
+	 */
 	function makeXmlCharts(rel) {
 		/**
 		 * DESC: Calc and return excel column name (eg: 'A2')
@@ -2725,7 +2891,7 @@ var PptxGenJS = function(){
 						// Add line-breaks if not bullets/aligned (we add CRLF for those below in STEP 2)
 						line += ( obj.options.breakLine && !obj.options.bullet && !obj.options.align ? CRLF : '' );
 						arrTextObjects.push( {text:line, options:obj.options} );
-					});
+						});
 				}
 				else {
 					// NOTE: The replace used here is for non-textObjects (plain strings) eg:'hello\nworld'
@@ -2923,8 +3089,8 @@ var PptxGenJS = function(){
 	}
 
 	/**
-	* DESC: Builds <a:bodyPr></a:bodyPr> tag
-	*/
+	 * DESC: Builds <a:bodyPr></a:bodyPr> tag
+	 */
 	function genXmlBodyProperties(objOptions) {
 		var bodyProperties = '<a:bodyPr';
 
@@ -2994,6 +3160,47 @@ var PptxGenJS = function(){
 
 		return outText;
 	}
+
+	// NEW Start
+	// NOTE: Chart and table don't inherit properties automatically from theirs placeholder
+	// NOTE: If exist properties from placeholder, function will return empty string
+	// otherwise default properties. Chart and table always need some properties (due to note #1).
+	function getXmlTransform(slideObj, locationAttr, x, y, cx, cy, placeholder) {
+		var strXml = '',
+			locAttr = '',
+			x = placeholder.options.hasOwnProperty('x') ? getSmartParseNumber(placeholder.options.x, 'X') : x,
+			y = placeholder.options.hasOwnProperty('y') ? getSmartParseNumber(placeholder.options.y, 'Y') : y,
+			cx = placeholder.options.hasOwnProperty('w') ? getSmartParseNumber(placeholder.options.w, 'X') : cx,
+			cy = placeholder.options.hasOwnProperty('h') ? getSmartParseNumber(placeholder.options.h, 'Y') : cy;
+
+		if (placeholder.options.hasOwnProperty('flipH')) locAttr += ' flipH="1"';
+		if (placeholder.options.hasOwnProperty('flipV')) locAttr += ' flipV="1"';
+		if (placeholder.options.hasOwnProperty('rotate')) locAttr += ' rot="' + convertRotationDegrees(placeholder.options.rotate) + '"';
+
+		locAttr = locAttr.length ? locAttr : locationAttr;
+
+		if (slideObj.type == 'chart') {
+			strXml += '<p:xfrm>';
+			strXml += '<a:off x="' + x + '" y="' + y + '"/>';
+			strXml += '<a:ext cx="' + cx + '" cy="' + cy + '"/>';
+			strXml += '</p:xfrm>';
+		} else if (slideObj.type == 'table') {
+			strXml += '<p:xfrm>';
+			strXml += ' <a:off  x="' + (x || EMU) + '"  y="' + (y || EMU) + '"/>';
+			strXml += ' <a:ext cx="' + (cx || EMU) + '" cy="' + (cy || EMU) + '"/>';
+			strXml += '</p:xfrm>';
+		} else if (!(placeholder.options.hasOwnProperty('x') || placeholder.options.hasOwnProperty('y') || placeholder.options.hasOwnProperty('w') || placeholder.options.hasOwnProperty('h'))) {
+			strXml += '<a:xfrm' + locationAttr + '>';
+			strXml += ' <a:off x="' + x + '" y="' + y + '"/>';
+			strXml += ' <a:ext cx="' + cx + '" cy="' + cy + '"/>';
+			strXml += '</a:xfrm>';
+		} else {
+			strXml = '<p:xfrm/>';
+		}
+
+		return strXml;
+	};
+	// NEW End
 
 	// XML-GEN: First 6 functions create the base /ppt files
 
@@ -3175,9 +3382,17 @@ var PptxGenJS = function(){
 	 * Generates the XML slide resource from a Slide object
 	 * @param {Object} inSlide - The slide object to transform into XML
 	 * @return {string} strSlideXml - Slide OOXML
-	*/
-	function makeXmlSlide(inSlide) {
+	 */
+	function makeXmlSlide(inSlide, intSlideNum) {
 		var intTableNum = 1;
+
+		// NEW Start
+		var layoutIdx = null;
+
+		if (gObjPptx.properLayoutMasterInUse) {
+			layoutIdx = getLayoutIdxForSlide(intSlideNum);
+		}
+		// NEW End
 
 		// STEP 1: Start slide XML
 		var strSlideXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+CRLF;
@@ -3207,7 +3422,13 @@ var PptxGenJS = function(){
 		// STEP 4: Loop over all Slide.data objects and add them to this slide ===============================
 		inSlide.data.forEach(function(slideObj, idx) {
 			var x = 0, y = 0, cx = getSmartParseNumber('75%','X'), cy = 0;
-			var locationAttr = "", shapeType = null;
+			var locationAttr = "", shapeType = null, placeholder = null;
+			
+			// NEW Start
+			if (gObjPptx.properLayoutMasterInUse && slideObj.options.placeholderName && layoutIdx) {
+				placeholder = getPlaceholder(slideObj.options.placeholderName, layoutIdx);
+			}
+			// NEW End
 
 			// A: Set option vars
 			slideObj.options = slideObj.options || {};
@@ -3248,21 +3469,33 @@ var PptxGenJS = function(){
 
 					// STEP 1: Start Table XML =============================
 					// NOTE: Non-numeric cNvPr id values will trigger "presentation needs repair" type warning in MS-PPT-2013
-					var strXml = '<p:graphicFrame>'
-							+ '  <p:nvGraphicFramePr>'
-							+ '    <p:cNvPr id="'+ (intTableNum*inSlide.numb + 1) +'" name="Table '+ (intTableNum*inSlide.numb) +'"/>'
-							+ '    <p:cNvGraphicFramePr><a:graphicFrameLocks noGrp="1"/></p:cNvGraphicFramePr>'
-							+ '    <p:nvPr><p:extLst><p:ext uri="{D42A27DB-BD31-4B8C-83A1-F6EECF244321}"><p14:modId xmlns:p14="http://schemas.microsoft.com/office/powerpoint/2010/main" val="1579011935"/></p:ext></p:extLst></p:nvPr>'
-							+ '  </p:nvGraphicFramePr>'
-							+ '  <p:xfrm>'
-							+ '    <a:off  x="'+ (x  || EMU) +'"  y="'+ (y  || EMU) +'"/>'
-							+ '    <a:ext cx="'+ (cx || EMU) +'" cy="'+ (cy || EMU) +'"/>'
-							+ '  </p:xfrm>'
-							+ '  <a:graphic>'
-							+ '    <a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/table">'
-							+ '      <a:tbl>'
-							+ '        <a:tblPr/>';
-							// + '        <a:tblPr bandRow="1"/>';
+					var strXml = '<p:graphicFrame>';
+					strXml += '  <p:nvGraphicFramePr>';
+					strXml += '    <p:cNvPr id="' + (intTableNum * inSlide.numb + 1) + '" name="Table ' + (intTableNum * inSlide.numb) + '"/>';
+					strXml += '    <p:cNvGraphicFramePr><a:graphicFrameLocks noGrp="1"/></p:cNvGraphicFramePr>';
+					strXml += '    <p:nvPr>';
+
+					if (gObjPptx.properLayoutMasterInUse && placeholder) {
+						strXml += '<p:ph idx="' + placeholder.idx + '" sz="quarter" type="' + placeholder.objectType + '"/>';
+					}
+
+					strXml += '     <p:extLst><p:ext uri="{D42A27DB-BD31-4B8C-83A1-F6EECF244321}"><p14:modId xmlns:p14="http://schemas.microsoft.com/office/powerpoint/2010/main" val="1579011935"/></p:ext></p:extLst></p:nvPr>';
+					strXml += '  </p:nvGraphicFramePr>';
+
+					if (gObjPptx.properLayoutMasterInUse && placeholder) {
+						strXml += getXmlTransform(slideObj, locationAttr, x, y, cx, cy, placeholder);
+					} else {
+						strXml += '  <p:xfrm>';
+						strXml += '    <a:off  x="' + (x || EMU) + '"  y="' + (y || EMU) + '"/>';
+						strXml += '    <a:ext cx="' + (cx || EMU) + '" cy="' + (cy || EMU) + '"/>';
+						strXml += '  </p:xfrm>';
+					}
+
+					strXml += '  <a:graphic>';
+					strXml += '    <a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/table">';
+					strXml += '      <a:tbl>';
+					strXml += '        <a:tblPr/>';
+					// strXml += '        <a:tblPr bandRow="1"/>';
 
 					// FIXME: Support banded rows, first/last row, etc.
 					// NOTE: Banding, etc. only shows when using a table style! (or set alt row color if banding)
@@ -3322,7 +3555,7 @@ var PptxGenJS = function(){
 										for (var idy=1; idy<Number(cell.opts.colspan); idy++) {
 											objTableGrid[rIdx][currColIdx+idy] = {"hmerge":true, text:"hmerge"};
 										}
-									}
+										}
 									else if ( cell && cell.opts && cell.opts.rowspan && !isNaN(Number(cell.opts.rowspan)) ) {
 										for (var idz=1; idz<Number(cell.opts.rowspan); idz++) {
 											if ( !objTableGrid[rIdx+idz] ) objTableGrid[rIdx+idz] = {};
@@ -3439,7 +3672,7 @@ var PptxGenJS = function(){
 							// LAST: COLSPAN: Add a 'merged' col for each column being merged (SEE: http://officeopenxml.com/drwTableGrid.php)
 							if ( cellOpts.colspan ) {
 								for (var tmp=1; tmp<Number(cellOpts.colspan); tmp++) { strXml += '<a:tc hMerge="1"><a:tcPr/></a:tc>'; }
-							}
+								}
 						});
 
 						// D: Complete row
@@ -3484,15 +3717,27 @@ var PptxGenJS = function(){
 					strSlideXml += '<p:sp>';
 
 					// B: The addition of the "txBox" attribute is the sole determiner of if an object is a Shape or Textbox
-					strSlideXml += '<p:nvSpPr><p:cNvPr id="'+ (idx+2) +'" name="Object '+ (idx+1) +'"/>';
-					strSlideXml += '<p:cNvSpPr' + ((slideObj.options && slideObj.options.isTextBox) ? ' txBox="1"/><p:nvPr/>' : '/><p:nvPr/>');
-					strSlideXml += '</p:nvSpPr>';
-					strSlideXml += '<p:spPr><a:xfrm' + locationAttr + '>';
-					strSlideXml += '<a:off x="'  + x  + '" y="'  + y  + '"/>';
-					strSlideXml += '<a:ext cx="' + cx + '" cy="' + cy + '"/></a:xfrm>';
-					strSlideXml += '<a:prstGeom prst="' + shapeType.name + '"><a:avLst>'
-						+ (slideObj.options.rectRadius ? '<a:gd name="adj" fmla="val '+ Math.round(slideObj.options.rectRadius * EMU * 100000 / Math.min(cx, cy)) +'" />' : '')
-						+ '</a:avLst></a:prstGeom>';
+					strSlideXml += '<p:nvSpPr><p:cNvPr id="' + (idx + 2) + '" name="Object ' + (idx + 1) + '"/>';
+					if (gObjPptx.properLayoutMasterInUse && placeholder) {
+						// NEW Start
+						strSlideXml += '<p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr>';
+						strSlideXml += '<p:nvPr><p:ph' + (placeholder.type != PLACEHOLDERS['title'].type ? ' idx="' + placeholder.idx + '"' : '') + ' type="' + placeholder.objectType + '"/></p:nvPr>';
+						strSlideXml += '</p:nvSpPr>';
+						strSlideXml += '<p:spPr>';
+
+						strSlideXml += getXmlTransform(slideObj, locationAttr, x, y, cx, cy, placeholder);
+						// NEW End
+					} else {
+						strSlideXml += '<p:cNvSpPr' + ((slideObj.options && slideObj.options.isTextBox) ? ' txBox="1"/><p:nvPr/>' : '/><p:nvPr/>');
+						strSlideXml += '</p:nvSpPr>';
+						strSlideXml += '<p:spPr><a:xfrm' + locationAttr + '>';
+						strSlideXml += '<a:off x="'  + x  + '" y="'  + y  + '"/>';
+						strSlideXml += '<a:ext cx="' + cx + '" cy="' + cy + '"/></a:xfrm>';
+					}
+
+					strSlideXml += '<a:prstGeom prst="' + shapeType.name + '"><a:avLst>' +
+						(slideObj.options.rectRadius ? '<a:gd name="adj" fmla="val ' + Math.round(slideObj.options.rectRadius * EMU * 100000 / Math.min(cx, cy)) + '" />' : '') +
+						'</a:avLst></a:prstGeom>';
 
 					// Option: FILL
 					strSlideXml += ( slideObj.options.fill ? genXmlColorSelection(slideObj.options.fill) : '<a:noFill/>' );
@@ -3536,19 +3781,34 @@ var PptxGenJS = function(){
 					break;
 
 				case 'image':
-			        strSlideXml += '<p:pic>';
+					strSlideXml += '<p:pic>';
 					strSlideXml += '  <p:nvPicPr>'
 					strSlideXml += '    <p:cNvPr id="'+ (idx + 2) +'" name="Object '+ (idx + 1) +'" descr="'+ slideObj.image +'">';
 					if ( slideObj.hyperlink ) strSlideXml += '<a:hlinkClick r:id="rId'+ slideObj.hyperlink.rId +'" tooltip="'+ (slideObj.hyperlink.tooltip ? decodeXmlEntities(slideObj.hyperlink.tooltip) : '') +'"/>';
 					strSlideXml += '    </p:cNvPr>';
-			        strSlideXml += '    <p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr><p:nvPr/>';
+					strSlideXml += '    <p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr>';
+
+					if (gObjPptx.properLayoutMasterInUse && placeholder) {
+						strSlideXml += '  <p:nvPr>';
+						strSlideXml += '   <p:ph idx="' + placeholder.idx + '"/>';
+						strSlideXml += '  </p:nvPr>';
+					} else {
+						strSlideXml += '  <p:nvPr/>';
+					}
+					
 					strSlideXml += '  </p:nvPicPr>';
 					strSlideXml += '<p:blipFill><a:blip r:embed="rId' + slideObj.imageRid + '" cstate="print"/><a:stretch><a:fillRect/></a:stretch></p:blipFill>';
 					strSlideXml += '<p:spPr>'
-					strSlideXml += ' <a:xfrm' + locationAttr + '>'
-					strSlideXml += '  <a:off  x="' + x  + '"  y="' + y  + '"/>'
-					strSlideXml += '  <a:ext cx="' + cx + '" cy="' + cy + '"/>'
-					strSlideXml += ' </a:xfrm>'
+
+					if (gObjPptx.properLayoutMasterInUse && placeholder) {
+						strSlideXml += getXmlTransform(slideObj, locationAttr, x, y, cx, cy, placeholder);
+					} else {
+						strSlideXml += ' <a:xfrm' + locationAttr + '>'
+						strSlideXml += '  <a:off  x="' + x  + '"  y="' + y  + '"/>'
+						strSlideXml += '  <a:ext cx="' + cx + '" cy="' + cy + '"/>'
+						strSlideXml += ' </a:xfrm>'
+					}
+					
 					strSlideXml += ' <a:prstGeom prst="rect"><a:avLst/></a:prstGeom>'
 					strSlideXml += '</p:spPr>';
 					strSlideXml += '</p:pic>';
@@ -3561,16 +3821,32 @@ var PptxGenJS = function(){
 						// IMPORTANT: <p:cNvPr id="" value is critical - if not the same number as preiew image rId, PowerPoint throws error!
 						strSlideXml += ' <p:cNvPr id="'+ (slideObj.mediaRid+2) +'" name="Picture'+ (idx + 1) +'"/>';
 						strSlideXml += ' <p:cNvPicPr/>';
-						strSlideXml += ' <p:nvPr>';
+						if (gObjPptx.properLayoutMasterInUse && placeholder) {
+							strSlideXml += '   <a:picLocks noChangeAspect="1" noGrp="1"/>';
+							strSlideXml += '  </p:cNvPicPr>';
+							strSlideXml += '  <p:nvPr>';
+							strSlideXml += '   <p:ph idx="' + placeholder.idx + '" sz="quarter" type="' + placeholder.objectType + '"/>';
+							strSlideXml += '   <a:videoFile r:link="rId' + slideObj.mediaRid + '"/>';
+							strSlideXml += '  </p:nvPr>';
+						} else {
+							strSlideXml += ' <p:nvPr>';
 						strSlideXml += '  <a:videoFile r:link="rId'+ slideObj.mediaRid +'"/>';
-						strSlideXml += ' </p:nvPr>';
+							strSlideXml += ' </p:nvPr>';
+						}
+						
 						strSlideXml += ' </p:nvPicPr>';
 						strSlideXml += ' <p:blipFill><a:blip r:embed="rId'+ (slideObj.mediaRid+2) +'"/><a:stretch><a:fillRect/></a:stretch></p:blipFill>'; // NOTE: Preview image is required!
 						strSlideXml += ' <p:spPr>';
-						strSlideXml += '  <a:xfrm' + locationAttr + '>';
+
+						if (gObjPptx.properLayoutMasterInUse && placeholder) {
+							strSlideXml += getXmlTransform(slideObj, locationAttr, x, y, cx, cy, placeholder);
+						} else {
+							strSlideXml += '  <a:xfrm' + locationAttr + '>';
 						strSlideXml += '   <a:off x="'  + x  + '" y="'  + y  + '"/>';
-						strSlideXml += '   <a:ext cx="' + cx + '" cy="' + cy + '"/>';
-						strSlideXml += '  </a:xfrm>';
+							strSlideXml += '   <a:ext cx="' + cx + '" cy="' + cy + '"/>';
+							strSlideXml += '  </a:xfrm>';
+						}
+						
 						strSlideXml += '  <a:prstGeom prst="rect"><a:avLst/></a:prstGeom>';
 						strSlideXml += ' </p:spPr>';
 						strSlideXml += '</p:pic>';
@@ -3579,10 +3855,20 @@ var PptxGenJS = function(){
 						strSlideXml += '<p:pic>';
 						strSlideXml += ' <p:nvPicPr>';
 						// IMPORTANT: <p:cNvPr id="" value is critical - if not the same number as preiew image rId, PowerPoint throws error!
-						strSlideXml += ' <p:cNvPr id="'+ (slideObj.mediaRid+2) +'" name="'+ slideObj.media.split('/').pop().split('.').shift() +'"><a:hlinkClick r:id="" action="ppaction://media"/></p:cNvPr>';
-						strSlideXml += ' <p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr>';
-						strSlideXml += ' <p:nvPr>';
-						strSlideXml += '  <a:videoFile r:link="rId'+ slideObj.mediaRid +'"/>';
+						strSlideXml += ' <p:cNvPr id="' + (slideObj.mediaRid + 2) + '" name="' + slideObj.media.split('/').pop().split('.').shift() + '"><a:hlinkClick r:id="" action="ppaction://media"/></p:cNvPr>';
+
+						if (gObjPptx.properLayoutMasterInUse && placeholder) {
+							strSlideXml += ' <p:cNvPicPr>';
+							strSlideXml += '  <a:picLocks noChangeAspect="1" noGrp="1"/>';
+							strSlideXml += ' </p:cNvPicPr>';
+							strSlideXml += ' <p:nvPr>';
+							strSlideXml += '  <p:ph idx="' + placeholder.idx + '" sz="quarter" type="' + placeholder.type + '"/>';
+						} else {
+							strSlideXml += ' <p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr>';
+							strSlideXml += ' <p:nvPr>';
+						}
+						
+						strSlideXml += '  <a:videoFile r:link="rId' + slideObj.mediaRid + '"/>';
 						strSlideXml += '  <p:extLst>';
 						strSlideXml += '   <p:ext uri="{DAA4B4D4-6D71-4841-9C94-3DE7FCFB9230}">';
 						strSlideXml += '    <p14:media xmlns:p14="http://schemas.microsoft.com/office/powerpoint/2010/main" r:embed="rId' + (slideObj.mediaRid+1) + '"/>';
@@ -3592,10 +3878,16 @@ var PptxGenJS = function(){
 						strSlideXml += ' </p:nvPicPr>';
 						strSlideXml += ' <p:blipFill><a:blip r:embed="rId'+ (slideObj.mediaRid+2) +'"/><a:stretch><a:fillRect/></a:stretch></p:blipFill>'; // NOTE: Preview image is required!
 						strSlideXml += ' <p:spPr>';
-						strSlideXml += '  <a:xfrm' + locationAttr + '>';
+
+						if (gObjPptx.properLayoutMasterInUse && placeholder) {
+							strSlideXml += getXmlTransform(slideObj, locationAttr, x, y, cx, cy, placeholder);
+						} else {
+							strSlideXml += '  <a:xfrm' + locationAttr + '>';
 						strSlideXml += '   <a:off x="'  + x  + '" y="'  + y  + '"/>';
-						strSlideXml += '   <a:ext cx="' + cx + '" cy="' + cy + '"/>';
-						strSlideXml += '  </a:xfrm>';
+							strSlideXml += '   <a:ext cx="' + cx + '" cy="' + cy + '"/>';
+							strSlideXml += '  </a:xfrm>';
+						}
+						
 						strSlideXml += '  <a:prstGeom prst="rect"><a:avLst/></a:prstGeom>';
 						strSlideXml += ' </p:spPr>';
 						strSlideXml += '</p:pic>';
@@ -3605,14 +3897,31 @@ var PptxGenJS = function(){
 				case 'chart':
 					strSlideXml += '<p:graphicFrame>';
 					strSlideXml += ' <p:nvGraphicFramePr>';
-					strSlideXml += '   <p:cNvPr id="'+ (idx + 2) +'" name="Chart '+ (idx + 1) +'"/>';
-					strSlideXml += '   <p:cNvGraphicFramePr/>';
-					strSlideXml += '   <p:nvPr/>';
+					strSlideXml += '   <p:cNvPr id="' + (idx + 2) + '" name="Chart ' + (idx + 1) + '"/>';
+
+					if (gObjPptx.properLayoutMasterInUse && placeholder) {
+						strSlideXml += '   <p:cNvGraphicFramePr>';
+						strSlideXml += '    <a:graphicFrameLocks noGrp="1"/>';
+						strSlideXml += '   </p:cNvGraphicFramePr>';
+						strSlideXml += '   <p:nvPr>';
+						strSlideXml += '    <p:ph idx="' + placeholder.idx + '" type="' + placeholder.type + '"/>';
+						strSlideXml += '   </p:nvPr>';
+					} else {
+						strSlideXml += '   <p:cNvGraphicFramePr/>';
+						strSlideXml += '   <p:nvPr/>';
+					}
+
 					strSlideXml += ' </p:nvGraphicFramePr>';
-					strSlideXml += ' <p:xfrm>'
+
+					if (gObjPptx.properLayoutMasterInUse && placeholder) {
+						strSlideXml += getXmlTransform(slideObj, locationAttr, x, y, cx, cy, placeholder);
+					} else {
+						strSlideXml += ' <p:xfrm>'
 					strSlideXml += '  <a:off  x="' + x  + '"  y="' + y  + '"/>'
-					strSlideXml += '  <a:ext cx="' + cx + '" cy="' + cy + '"/>'
-					strSlideXml += ' </p:xfrm>'
+						strSlideXml += '  <a:ext cx="' + cx + '" cy="' + cy + '"/>'
+						strSlideXml += ' </p:xfrm>'
+					}
+
 					strSlideXml += ' <a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">';
 					strSlideXml += '  <a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/chart">';
 					strSlideXml += '   <c:chart r:id="rId'+ (slideObj.chartRid) +'" xmlns:c="http://schemas.openxmlformats.org/drawingml/2006/chart"/>';
@@ -4015,7 +4324,7 @@ var PptxGenJS = function(){
 		}
 		else {
 			try { console.warn('UNKNOWN LAYOUT! Valid values = ' + Object.keys(LAYOUTS)); } catch(ex){}
-		}
+	}
 	}
 
 	/**
@@ -4183,6 +4492,10 @@ var PptxGenJS = function(){
 			var strType  = (opt.type || "audio");
 			var strExtn  = "mp3";
 
+			// NEW Start
+			var placeholderName = (opt.placeholderName || null);
+			// NEW End
+
 			// STEP 1: REALITY-CHECK
 			if ( !strPath && !strData && strType != 'online' ) {
 				console.error("ERROR: `addMedia()` requires either 'data' or 'path' values!");
@@ -4222,6 +4535,10 @@ var PptxGenJS = function(){
 			gObjPptx.slides[slideNum].data[slideObjNum].options.cx = intSizeX;
 			gObjPptx.slides[slideNum].data[slideObjNum].options.cy = intSizeY;
 
+			// NEW Start
+			gObjPptx.slides[slideNum].data[slideObjNum].options.placeholderName = placeholderName;
+			// NEW End
+
 			// STEP 4: Add this media to this Slide Rels (rId/rels count spans all slides! Count all media to get next rId)
 			// NOTE: rId starts at 2 (hence the intRels+1 below) as slideLayout.xml is rId=1!
 			$.each(gObjPptx.slides, function(i,slide){ intRels += slide.rels.length; });
@@ -4249,7 +4566,7 @@ var PptxGenJS = function(){
 			else {
 				// Audio/Video files consume *TWO* rId's:
 				// <Relationship Id="rId2" Target="../media/media1.mov" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/video"/>
-			    // <Relationship Id="rId3" Target="../media/media1.mov" Type="http://schemas.microsoft.com/office/2007/relationships/media"/>
+				// <Relationship Id="rId3" Target="../media/media1.mov" Type="http://schemas.microsoft.com/office/2007/relationships/media"/>
 				slideObjRels.push({
 					path: (strPath || 'preencoded'+strExtn),
 					type: strType+'/'+strExtn,
@@ -4494,6 +4811,7 @@ var PptxGenJS = function(){
 		var slideObj = {
 			slide: masterDef,
 			data: [],
+			placeholders: [],
 			rels: []
 		};
 
@@ -4516,6 +4834,7 @@ var PptxGenJS = function(){
 			slide: {},
 			name: layoutDef.title,
 			data: [],
+			placeholders: [],
 			rels: [],
 			slideNumberObj: null
 		};
@@ -4627,7 +4946,7 @@ var PptxGenJS = function(){
 							arrRGB = $(cell).css('border-'+val+'-color').replace(/\s+/gi,'').replace('rgba(','').replace('rgb(','').replace(')','').split(',');
 							var strBorderC = rgbToHex( Number(arrRGB[0]), Number(arrRGB[1]), Number(arrRGB[2]) );
 							objOpts.border.push( {pt:intBorderW, color:strBorderC} );
-						});
+							});
 					}
 
 					// F: Massage cell text so we honor linebreak tag as a line break during line parsing
@@ -4661,18 +4980,18 @@ var PptxGenJS = function(){
 
 		getSlidesForTableRows( arrObjTabHeadRows.concat(arrObjTabBodyRows).concat(arrObjTabFootRows), opts )
 		.forEach(function(arrTabRows,i){
-			// A: Create new Slide
+				// A: Create new Slide
 			var newSlide = ( opts.master && gObjPptxMasters ? api.addNewSlide(opts.master) : api.addNewSlide() );
 
-			// B: Add table to Slide
+				// B: Add table to Slide
 			newSlide.addTable(arrTabRows, {x:(opts.x || arrInchMargins[3]), y:(opts.y || arrInchMargins[0]), cx:(emuSlideTabW/EMU), colW:arrColW, autoPage:false});
 
-			// C: Add any additional objects
+				// C: Add any additional objects
 			if ( opts.addImage ) newSlide.addImage({ path:opts.addImage.url, x:opts.addImage.x, y:opts.addImage.y, w:opts.addImage.w, h:opts.addImage.h });
 			if ( opts.addShape ) newSlide.addShape( opts.addShape.shape, (opts.addShape.opts || {}) );
 			if ( opts.addTable ) newSlide.addTable( opts.addTable.rows,  (opts.addTable.opts || {}) );
 			if ( opts.addText  ) newSlide.addText(  opts.addText.text,   (opts.addText.opts  || {}) );
-		});
+				});
 	}
 };
 
