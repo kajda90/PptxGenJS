@@ -44,10 +44,14 @@
 				bkgd: "ff0000"
 			}, {
 				title: {
+					p: {"align":"left","bold":true,"bullet":true,"color":"ffffff","font_face":"Impact","font_size":50,"italic":false,"inset":0,"indentLevel":1,"lineSpacing":10,"margin":10,"underline":false,"valign":"middle","rtlMode":false},
+					list: [{"align":"left","bold":true,"bullet":true,"color":"ffffff","font_face":"Impact","font_size":50,"italic":false,"inset":0,"indentLevel":1,"lineSpacing":10,"margin":10,"underline":false,"valign":"middle","rtlMode":false}]
+				},
+				body: {
 					p: {"align":"left","bold":true,"bullet":true,"color":"ffffff","font_face":"Arial","font_size":50,"italic":false,"inset":0,"indentLevel":1,"lineSpacing":10,"margin":10,"underline":false,"valign":"middle","rtlMode":false},
 					list: [{"align":"left","bold":true,"bullet":true,"color":"ffffff","font_face":"Arial","font_size":50,"italic":false,"inset":0,"indentLevel":1,"lineSpacing":10,"margin":10,"underline":false,"valign":"middle","rtlMode":false}]
 				},
-				body: {
+				other: {
 					p: {"align":"left","bold":true,"bullet":true,"color":"ffffff","font_face":"Arial","font_size":50,"italic":false,"inset":0,"indentLevel":1,"lineSpacing":10,"margin":10,"underline":false,"valign":"middle","rtlMode":false},
 					list: [{"align":"left","bold":true,"bullet":true,"color":"ffffff","font_face":"Arial","font_size":50,"italic":false,"inset":0,"indentLevel":1,"lineSpacing":10,"margin":10,"underline":false,"valign":"middle","rtlMode":false}]
 				}
@@ -58,9 +62,15 @@
 					type: 'title',
 					name: 'title',
 					options: {x: 1, y: 1}
+				}, {
+					type: 'subTitle',
+					name: 'text',
+					options: {x: 1, y: 3}
 				}]
 			})
-			pptx.addNewSlide('basic').addText('Ahoj', {placeholderName: 'title'});
+			let sld = pptx.addNewSlide('basic')
+			sld.addText('Ahoj', {placeholderName: 'title'});
+			sld.addText('Hello', {placeholderName: 'text'});
 			pptx.save('Sample Presentation');
 		}
 

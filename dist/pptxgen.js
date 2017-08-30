@@ -267,7 +267,7 @@ var PptxGenJS = function(useProperLayoutMaster){
 
 			// STEP 2: Set some options
 			// Set color (options > inherit from Slide > default to black)
-			opt.color = ( opt.color || this.color || '000000' );
+			//opt.color = ( opt.color || this.color || '000000' );
 
 			// ROBUST: Convert attr values that will likely be passed by users to valid OOXML values
 			if ( opt.valign ) opt.valign = opt.valign.toLowerCase().replace(/^c.*/i,'ctr').replace(/^m.*/i,'ctr').replace(/^t.*/i,'t').replace(/^b.*/i,'b');
