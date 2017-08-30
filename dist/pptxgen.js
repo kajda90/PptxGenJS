@@ -150,6 +150,11 @@ var PptxGenJS = function(useProperLayoutMaster){
 			objectName: 'Sub Title Placeholder',
 			objectType: 'subTitle'
 		},
+		content: {
+			type: 'content',
+			objectName: 'Content Placeholder',
+			objectType: null
+		},
 		table: {
 			type: 'table',
 			objectName: 'Table Placeholder',
@@ -1152,34 +1157,168 @@ var PptxGenJS = function(useProperLayoutMaster){
 				if (placeholderObj.options.flipV) locationAttr += ' flipV="1"';
 				if (placeholderObj.options.rotate) locationAttr += ' rot="' + convertRotationDegrees(placeholderObj.options.rotate) + '"';
 
-				strSlideXml += '<p:sp>';
-				strSlideXml += ' <p:nvSpPr>';
-				strSlideXml += '  <p:cNvPr id="' + placeholderObj.id + '" name="' + placeholderObj.objectName + ' ' + placeholderObj.idx + '"/>';
-				strSlideXml += '    <p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr>';
-				strSlideXml += '   <p:nvPr>';
-				strSlideXml += '   <p:ph' + (placeholderObj.type != PLACEHOLDERS['title'].type ? ' idx="' + placeholderObj.idx + '"' : '') + ' type="' + placeholderObj.objectType + '"/>';
-				strSlideXml += '  </p:nvPr>';
-				strSlideXml += ' </p:nvSpPr>';
-				strSlideXml += ' <p:spPr><a:xfrm' + locationAttr + '>';
-				strSlideXml += '  <a:off x="' + x + '" y="' + y + '"/>';
-				strSlideXml += '  <a:ext cx="' + cx + '" cy="' + cy + '"/></a:xfrm>';
-				strSlideXml += ' </p:spPr>';
 
-				if (placeholderObj.hasOwnProperty('text')) {
-					strSlideXml += ' <p:txBody>';
-					strSlideXml += '  <a:bodyPr anchor="ctr"/>';
-					strSlideXml += '  <a:lstStyle />';
-					strSlideXml += '  <a:p>';
-					strSlideXml += '   <a:r>';
-					strSlideXml += '    <a:rPr lang="en-US" smtClean="0"/>';
-					strSlideXml += '    <a:t>' + placeholderObj.text + '</a:t>'
-					strSlideXml += '   </a:r>';
-					strSlideXml += '   <a:endParaRPr lang="en-US"/>';
-					strSlideXml += '  </a:p>';
-					strSlideXml += ' </p:txBody>';
+				if (placeholderObj.type == PLACEHOLDERS['content'].type) {
+					strSlideXml += '<p:sp>';
+					strSlideXml += '  <p:nvSpPr>';
+					strSlideXml += '    <p:cNvPr id="3" name="Content Placeholder 2"/>';
+					strSlideXml += '      <p:cNvSpPr>';
+					strSlideXml += '        <a:spLocks noGrp="1"/>';
+					strSlideXml += '      </p:cNvSpPr>';
+					strSlideXml += '    <p:nvPr>';
+					strSlideXml += '      <p:ph idx="1"/>';
+					strSlideXml += '    </p:nvPr>';
+					strSlideXml += '  </p:nvSpPr>';
+					strSlideXml += '  <p:spPr/>';
+					strSlideXml += '  <p:txBody>';
+					strSlideXml += '    <a:bodyPr>';
+					strSlideXml += '      <a:normAutofit/>';
+					strSlideXml += '    </a:bodyPr>';
+					strSlideXml += '    <a:lstStyle>';
+					strSlideXml += '      <a:lvl1pPr>';
+					strSlideXml += '        <a:lnSpc>';
+					strSlideXml += '          <a:spcPct val="120000"/>'
+					strSlideXml += '        </a:lnSpc>';
+					strSlideXml += '        <a:defRPr sz="1200"/>';
+					strSlideXml += '      </a:lvl1pPr>';
+					strSlideXml += '      <a:lvl2pPr>';
+					strSlideXml += '        <a:lnSpc>';
+					strSlideXml += '          <a:spcPct val="120000"/>';
+					strSlideXml += '        </a:lnSpc>';
+					strSlideXml += '        <a:defRPr sz="1100"/>'
+					strSlideXml += '      </a:lvl2pPr>';
+					strSlideXml += '      <a:lvl3pPr>';
+					strSlideXml += '        <a:lnSpc>';
+					strSlideXml += '          <a:spcPct val="120000"/>';
+					strSlideXml += '        </a:lnSpc>';
+					strSlideXml += '        <a:defRPr sz="1000"/>';
+					strSlideXml += '      </a:lvl3pPr>';
+					strSlideXml += '      <a:lvl4pPr>';
+					strSlideXml += '        <a:lnSpc>';
+					strSlideXml += '          <a:spcPct val="120000"/>';
+					strSlideXml += '        </a:lnSpc>';
+					strSlideXml += '        <a:defRPr sz="1000"/>'
+					strSlideXml += '      </a:lvl4pPr>';
+					strSlideXml += '      <a:lvl5pPr>';
+					strSlideXml += '        <a:lnSpc>';
+					strSlideXml += '          <a:spcPct val="120000"/>';
+					strSlideXml += '        </a:lnSpc>';
+					strSlideXml += '        <a:defRPr sz="1000"/>';
+					strSlideXml += '      </a:lvl5pPr>';
+					strSlideXml += '    </a:lstStyle>';
+					strSlideXml += '    <a:p>';
+					strSlideXml += '      <a:pPr lvl="0"/>';
+					strSlideXml += '      <a:r>';
+					strSlideXml += '        <a:rPr dirty="0" lang="en-US" smtClean="0"/>';
+					strSlideXml += '        <a:t>Click to edit Master text styles</a:t>';
+					strSlideXml += '      </a:r>';
+					strSlideXml += '    </a:p>';
+					strSlideXml += '    <a:p>';
+					strSlideXml += '      <a:pPr lvl="1"/>';
+					strSlideXml += '      <a:r>';
+					strSlideXml += '        <a:rPr dirty="0" lang="en-US" smtClean="0"/>';
+					strSlideXml += '        <a:t>Second level</a:t>';
+					strSlideXml += '      </a:r>';
+					strSlideXml += '    </a:p>';
+					strSlideXml += '    <a:p>';
+					strSlideXml += '      <a:pPr lvl="2"/>';
+					strSlideXml += '      <a:r>';
+					strSlideXml += '        <a:rPr dirty="0" lang="en-US" smtClean="0"/>';
+					strSlideXml += '        <a:t>Third level</a:t>';
+					strSlideXml += '      </a:r>';
+					strSlideXml += '    </a:p>';
+					strSlideXml += '    <a:p>';
+					strSlideXml += '      <a:pPr lvl="3"/>';
+					strSlideXml += '      <a:r>';
+					strSlideXml += '        <a:rPr dirty="0" lang="en-US" smtClean="0"/>';
+					strSlideXml += '        <a:t>Fourth level</a:t>';
+					strSlideXml += '      </a:r>';
+					strSlideXml += '    </a:p>';
+					strSlideXml += '    <a:p>';
+					strSlideXml += '      <a:pPr lvl="4"/>';
+					strSlideXml += '      <a:r>';
+					strSlideXml += '        <a:rPr dirty="0" lang="en-US" smtClean="0"/>';
+					strSlideXml += '        <a:t>Fifth level</a:t>';
+					strSlideXml += '      </a:r>';
+					strSlideXml += '      <a:endParaRPr dirty="0" lang="en-US"/>';
+					strSlideXml += '    </a:p>';
+					strSlideXml += '  </p:txBody>';
+					strSlideXml += '</p:sp>';
+				} else {
+
+
+					strSlideXml += '<p:sp>';
+					strSlideXml += ' <p:nvSpPr>';
+					strSlideXml += '  <p:cNvPr id="' + placeholderObj.id + '" name="' + placeholderObj.objectName + ' ' + placeholderObj.idx + '"/>';
+					strSlideXml += '    <p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr>';
+					strSlideXml += '   <p:nvPr>';
+					strSlideXml += '   <p:ph' + (placeholderObj.type != PLACEHOLDERS['title'].type ? ' idx="' + placeholderObj.idx + '"' : '') + (placeholderObj.objectType != null ? ' type="' + placeholderObj.objectType + '"' : '') + '/>';
+					strSlideXml += '  </p:nvPr>';
+					strSlideXml += ' </p:nvSpPr>';
+					strSlideXml += ' <p:spPr><a:xfrm' + locationAttr + '>';
+					strSlideXml += '  <a:off x="' + x + '" y="' + y + '"/>';
+					strSlideXml += '  <a:ext cx="' + cx + '" cy="' + cy + '"/></a:xfrm>';
+					strSlideXml += ' </p:spPr>';
+
+					if (placeholderObj.hasOwnProperty('text')) {
+						strSlideXml += ' <p:txBody>';
+						strSlideXml += '  <a:bodyPr/>';
+						strSlideXml += '  <a:lstStyle />';
+						strSlideXml += '  <a:p>';
+						strSlideXml += '   <a:r>';
+						strSlideXml += '    <a:rPr lang="en-US" smtClean="0"/>';
+						strSlideXml += '    <a:t>' + placeholderObj.text + '</a:t>'
+						strSlideXml += '   </a:r>';
+						strSlideXml += '   <a:endParaRPr lang="en-US"/>';
+						strSlideXml += '  </a:p>';
+						strSlideXml += ' </p:txBody>';
+					}
+
+
+					/*strSlideXml += '  <p:txBody>';
+					strSlideXml += '    <a:bodyPr/>';
+					strSlideXml += '    <a:lstStyle/>';
+					strSlideXml += '    <a:p>';
+					strSlideXml += '      <a:pPr lvl="0"/>';
+					strSlideXml += '      <a:r>';
+					strSlideXml += '        <a:rPr dirty="0" lang="en-US" smtClean="0"/>';
+					strSlideXml += '        <a:t>' + (placeholderObj.hasOwnProperty('text') ? placeholderObj.text : 'Click to edit Master text styles' ) + '</a:t>';
+					strSlideXml += '      </a:r>';
+					strSlideXml += '    </a:p>';
+					strSlideXml += '    <a:p>';
+					strSlideXml += '      <a:pPr lvl="1"/>';
+					strSlideXml += '      <a:r>';
+					strSlideXml += '        <a:rPr dirty="0" lang="en-US" smtClean="0"/>';
+					strSlideXml += '        <a:t>Second level</a:t>';
+					strSlideXml += '      </a:r>';
+					strSlideXml += '    </a:p>';
+					strSlideXml += '    <a:p>';
+					strSlideXml += '      <a:pPr lvl="2"/>';
+					strSlideXml += '      <a:r>';
+					strSlideXml += '        <a:rPr dirty="0" lang="en-US" smtClean="0"/>';
+					strSlideXml += '        <a:t>Third level</a:t>';
+					strSlideXml += '      </a:r>';
+					strSlideXml += '    </a:p>';
+					strSlideXml += '    <a:p>';
+					strSlideXml += '      <a:pPr lvl="3"/>';
+					strSlideXml += '      <a:r>';
+					strSlideXml += '        <a:rPr dirty="0" lang="en-US" smtClean="0"/>';
+					strSlideXml += '        <a:t>Fourth level</a:t>';
+					strSlideXml += '      </a:r>';
+					strSlideXml += '    </a:p>';
+					strSlideXml += '    <a:p>';
+					strSlideXml += '      <a:pPr lvl="4"/>';
+					strSlideXml += '      <a:r>';
+					strSlideXml += '        <a:rPr dirty="0" lang="en-US" smtClean="0"/>';
+					strSlideXml += '        <a:t>Fifth level</a:t>';
+					strSlideXml += '      </a:r>';
+					strSlideXml += '      <a:endParaRPr dirty="0" lang="en-US"/>';
+					strSlideXml += '    </a:p>';
+					strSlideXml += '  </p:txBody>';*/
+
+					strSlideXml += '</p:sp>';
+				
 				}
-
-				strSlideXml += '</p:sp>';
 			});
 
 			// STEP 6: Close spTree and finalize slide XML
