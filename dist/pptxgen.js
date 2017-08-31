@@ -5028,7 +5028,7 @@ var PptxGenJS = function(useProperLayoutMaster){
 			rels: []
 		};
 
-		gObjPptx.masterStyle = masterStyle;
+		gObjPptx.masterStyle = masterStyle || {};
 		gObjPptxGenerators.createSlideObject(masterDef || {}, slideObj);
 		gObjPptx.masterSlide = slideObj;
 		return this;
