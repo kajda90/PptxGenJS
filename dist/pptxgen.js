@@ -194,7 +194,8 @@ var PptxGenJS = function(useProperLayoutMaster){
 	gObjPptx.masterSlide = {
 		slide: {},
 		data: [],
-		rels: []
+		rels: [],
+		placeholders: []
 	};
 	/** @type {object} specifies data for txStyles element in master file */
 	gObjPptx.masterStyle = null;
