@@ -80,6 +80,7 @@ Quickly and easily create PowerPoint presentations with a few simple JavaScript 
   - [Slide Master Object Options](#slide-master-object-options)
   - [Sample Slide Master File](#sample-slide-master-file)
   - [Layouting – New Approach](#layouting-–-new-approach)
+  - [Themes](#themes)
 - [Table-to-Slides Feature](#table-to-slides-feature)
   - [Table-to-Slides Options](#table-to-slides-options)
   - [Table-to-Slides HTML Options](#table-to-slides-html-options)
@@ -1015,6 +1016,20 @@ pptx.addNewSlide('welcome', { bkgd: '0000ff' });
 ```
 
 You are not required to specify layout name for each slide. if you pass falsy (or no) value, an empty layout already defined inside the library will be used.
+
+## Themes
+You can optionally specify full or partial color palette that will be used by default and will be accessible by scheme color constants as described in [Scheme Color](#scheme-colors). To do so, call `setTheme` method:
+```javascript
+pptx.setTheme( {
+	dk1: 'ff0000',
+	lt1: '333333'
+}, 'My Own Theme')
+```
+The following color names are accepted:
+* `dk1` and `dk2` (dark) referred as color constants `TEXT1` and `TEXT2`,
+* `lt1` and `lt2` (light) referred as color constants `BACKGROUND1` and `BACKGROUND2`,
+* `accent1` to `accent6` referred as color constants `ACCENT1` to `ACCENT6`,
+
 
 **************************************************************************************************
 # Table-to-Slides Feature
