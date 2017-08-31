@@ -63,7 +63,7 @@ if ( NODEJS ) {
 var PptxGenJS = function(useProperLayoutMaster){
 	// CONSTANTS
 	var APP_VER = "1.8.0-beta";
-	var APP_REL = "20170822";
+	var APP_REL = "20170830";
 	//
 	var MASTER_OBJECTS = {
 		'chart': { name:'chart' },
@@ -150,6 +150,11 @@ var PptxGenJS = function(useProperLayoutMaster){
 			type: 'subTitle',
 			objectName: 'Sub Title Placeholder',
 			objectType: 'subTitle'
+		},
+		text: {
+			type: 'text',
+			objectName: 'Text Placeholder',
+			objectType: 'body'
 		},
 		content: {
 			type: 'content',
@@ -1134,6 +1139,7 @@ var PptxGenJS = function(useProperLayoutMaster){
 				strSlideXml += '</p:sp>';
 			}
 
+			// NEW Start
 			slideObject.placeholders.forEach(function(placeholderObj, idx) {
 				let x = 0,
 					y = 0,
@@ -1161,24 +1167,37 @@ var PptxGenJS = function(useProperLayoutMaster){
 				if (placeholderObj.options.flipV) locationAttr += ' flipV="1"';
 				if (placeholderObj.options.rotate) locationAttr += ' rot="' + convertRotationDegrees(placeholderObj.options.rotate) + '"';
 
-
+				// TODO
 				if (placeholderObj.type == PLACEHOLDERS['content'].type) {
+					if (!placeholderObj.options.cx || placeholderObj.options.cx == 0) cx = getSmartParseNumber('100%', 'X');
+					if (!placeholderObj.options.cy || placeholderObj.options.cy == 0) cy = getSmartParseNumber('100%', 'Y');
+
 					strSlideXml += '<p:sp>';
 					strSlideXml += '  <p:nvSpPr>';
-					strSlideXml += '    <p:cNvPr id="3" name="Content Placeholder 2"/>';
+					strSlideXml += '    <p:cNvPr id="' + placeholderObj.id + '" name="Content Placeholder 2"/>';
 					strSlideXml += '      <p:cNvSpPr>';
 					strSlideXml += '        <a:spLocks noGrp="1"/>';
 					strSlideXml += '      </p:cNvSpPr>';
 					strSlideXml += '    <p:nvPr>';
-					strSlideXml += '      <p:ph idx="1"/>';
+					strSlideXml += '      <p:ph idx="' + placeholderObj.idx + '"/>';
 					strSlideXml += '    </p:nvPr>';
 					strSlideXml += '  </p:nvSpPr>';
-					strSlideXml += '  <p:spPr/>';
+					//strSlideXml += '  <p:spPr/>';
+					strSlideXml += '  <p:spPr>';
+					strSlideXml += '    <a:xfrm' + locationAttr + '>';
+					strSlideXml += '      <a:off x="' + x + '" y="' + y + '"/>';
+					strSlideXml += '      <a:ext cx="' + cx + '" cy="' + cy + '"/>';
+					strSlideXml += '    </a:xfrm>';
+					strSlideXml += '    <a:prstGeom prst="rect">';
+					strSlideXml += '      <a:avLst/>';
+					strSlideXml += '    </a:prstGeom>';
+					strSlideXml += '  </p:spPr>';
 					strSlideXml += '  <p:txBody>';
 					strSlideXml += '    <a:bodyPr>';
 					strSlideXml += '      <a:normAutofit/>';
 					strSlideXml += '    </a:bodyPr>';
-					strSlideXml += '    <a:lstStyle>';
+					strSlideXml += '    <a:lstStyle/>';
+					/*strSlideXml += '    <a:lstStyle>';
 					strSlideXml += '      <a:lvl1pPr>';
 					strSlideXml += '        <a:lnSpc>';
 					strSlideXml += '          <a:spcPct val="120000"/>'
@@ -1209,7 +1228,7 @@ var PptxGenJS = function(useProperLayoutMaster){
 					strSlideXml += '        </a:lnSpc>';
 					strSlideXml += '        <a:defRPr sz="1000"/>';
 					strSlideXml += '      </a:lvl5pPr>';
-					strSlideXml += '    </a:lstStyle>';
+					strSlideXml += '    </a:lstStyle>';*/
 					strSlideXml += '    <a:p>';
 					strSlideXml += '      <a:pPr lvl="0"/>';
 					strSlideXml += '      <a:r>';
@@ -1249,8 +1268,6 @@ var PptxGenJS = function(useProperLayoutMaster){
 					strSlideXml += '  </p:txBody>';
 					strSlideXml += '</p:sp>';
 				} else {
-
-
 					strSlideXml += '<p:sp>';
 					strSlideXml += ' <p:nvSpPr>';
 					strSlideXml += '  <p:cNvPr id="' + placeholderObj.id + '" name="' + placeholderObj.objectName + ' ' + placeholderObj.idx + '"/>';
@@ -1259,71 +1276,39 @@ var PptxGenJS = function(useProperLayoutMaster){
 					strSlideXml += '   <p:ph' + (placeholderObj.type != PLACEHOLDERS['title'].type ? ' idx="' + placeholderObj.idx + '"' : '') + (placeholderObj.objectType != null ? ' type="' + placeholderObj.objectType + '"' : '') + '/>';
 					strSlideXml += '  </p:nvPr>';
 					strSlideXml += ' </p:nvSpPr>';
+
 					strSlideXml += ' <p:spPr><a:xfrm' + locationAttr + '>';
 					strSlideXml += '  <a:off x="' + x + '" y="' + y + '"/>';
 					strSlideXml += '  <a:ext cx="' + cx + '" cy="' + cy + '"/></a:xfrm>';
 					strSlideXml += ' </p:spPr>';
 
-					if (placeholderObj.hasOwnProperty('text')) {
-						strSlideXml += ' <p:txBody>';
-						strSlideXml += '  <a:bodyPr/>';
-						strSlideXml += '  <a:lstStyle />';
-						strSlideXml += '  <a:p>';
-						strSlideXml += '   <a:r>';
-						strSlideXml += '    <a:rPr lang="en-US" smtClean="0"/>';
-						strSlideXml += '    <a:t>' + placeholderObj.text + '</a:t>'
-						strSlideXml += '   </a:r>';
-						strSlideXml += '   <a:endParaRPr lang="en-US"/>';
-						strSlideXml += '  </a:p>';
-						strSlideXml += ' </p:txBody>';
+					strSlideXml += '  <p:txBody>';
+
+					if (placeholderObj.type == PLACEHOLDERS['title'].type || placeholderObj.type == PLACEHOLDERS['ctrTitle'].type || placeholderObj.type == PLACEHOLDERS['subTitle'].type || placeholderObj.type == PLACEHOLDERS['text'].type) {
+						strSlideXml += '    <a:bodyPr' + getXmlAlign('algn', placeholderObj.options.valign) + '/>';
+						strSlideXml += '    <a:lstStyle>';
+						strSlideXml += '      <a:lvl1pPr' + getXmlAlign('algn', placeholderObj.options.align) + '>';
+						strSlideXml += '        ' + gObjPptxGenerators.textRunPropsToXml('a:defRPr', placeholderObj.options);
+						strSlideXml += '      </a:lvl1pPr>';
+						strSlideXml += '    </a:lstStyle>';
+					} else {
+						strSlideXml += '    <a:bodyPr/>';
+						strSlideXml += '    <a:lstStyle/>';
 					}
 
-
-					/*strSlideXml += '  <p:txBody>';
-					strSlideXml += '    <a:bodyPr/>';
-					strSlideXml += '    <a:lstStyle/>';
 					strSlideXml += '    <a:p>';
-					strSlideXml += '      <a:pPr lvl="0"/>';
 					strSlideXml += '      <a:r>';
-					strSlideXml += '        <a:rPr dirty="0" lang="en-US" smtClean="0"/>';
-					strSlideXml += '        <a:t>' + (placeholderObj.hasOwnProperty('text') ? placeholderObj.text : 'Click to edit Master text styles' ) + '</a:t>';
+					strSlideXml += '        <a:rPr lang="en-US" smtClean="0"/>';
+					strSlideXml += '        <a:t>' + (placeholderObj.hasOwnProperty('text') ? placeholderObj.text : placeholderObj.objectName) + '</a:t>'
 					strSlideXml += '      </a:r>';
+					strSlideXml += '      <a:endParaRPr lang="en-US"/>';
 					strSlideXml += '    </a:p>';
-					strSlideXml += '    <a:p>';
-					strSlideXml += '      <a:pPr lvl="1"/>';
-					strSlideXml += '      <a:r>';
-					strSlideXml += '        <a:rPr dirty="0" lang="en-US" smtClean="0"/>';
-					strSlideXml += '        <a:t>Second level</a:t>';
-					strSlideXml += '      </a:r>';
-					strSlideXml += '    </a:p>';
-					strSlideXml += '    <a:p>';
-					strSlideXml += '      <a:pPr lvl="2"/>';
-					strSlideXml += '      <a:r>';
-					strSlideXml += '        <a:rPr dirty="0" lang="en-US" smtClean="0"/>';
-					strSlideXml += '        <a:t>Third level</a:t>';
-					strSlideXml += '      </a:r>';
-					strSlideXml += '    </a:p>';
-					strSlideXml += '    <a:p>';
-					strSlideXml += '      <a:pPr lvl="3"/>';
-					strSlideXml += '      <a:r>';
-					strSlideXml += '        <a:rPr dirty="0" lang="en-US" smtClean="0"/>';
-					strSlideXml += '        <a:t>Fourth level</a:t>';
-					strSlideXml += '      </a:r>';
-					strSlideXml += '    </a:p>';
-					strSlideXml += '    <a:p>';
-					strSlideXml += '      <a:pPr lvl="4"/>';
-					strSlideXml += '      <a:r>';
-					strSlideXml += '        <a:rPr dirty="0" lang="en-US" smtClean="0"/>';
-					strSlideXml += '        <a:t>Fifth level</a:t>';
-					strSlideXml += '      </a:r>';
-					strSlideXml += '      <a:endParaRPr dirty="0" lang="en-US"/>';
-					strSlideXml += '    </a:p>';
-					strSlideXml += '  </p:txBody>';*/
-
+					strSlideXml += '  </p:txBody>';
 					strSlideXml += '</p:sp>';
 				
 				}
 			});
+			// NEW End
 
 			// STEP 6: Close spTree and finalize slide XML
 			strSlideXml += '</p:spTree>';
@@ -1443,11 +1428,11 @@ var PptxGenJS = function(useProperLayoutMaster){
 				var props = opts[key];
 				var strXml = '<p:'+ key + 'Style>';
 				if ( props.p ) {
-					strXml += '<a:defPPr' + getXmlAlign(props.p.align) + '>' + gObjPptxGenerators.textRunPropsToXml('a:defRPr', opts[key].p) + '</a:defPPr>';
+					strXml += '<a:defPPr' + getXmlAlign('algn', props.p.align) + '>' + gObjPptxGenerators.textRunPropsToXml('a:defRPr', opts[key].p) + '</a:defPPr>';
 				}
 				if ( props.list ) {
 					strXml += props.list.map(function(levelOpts, idx) {
-						return '<a:lvl'+ (idx + 1) + 'pPr' + getXmlAlign(levelOpts.align) + '>' + gObjPptxGenerators.textRunPropsToXml('a:defRPr', levelOpts) + '</a:lvl'+ (idx + 1) + 'pPr>';
+						return '<a:lvl'+ (idx + 1) + 'pPr' + getXmlAlign('algn', levelOpts.align) + '>' + gObjPptxGenerators.textRunPropsToXml('a:defRPr', levelOpts) + '</a:lvl'+ (idx + 1) + 'pPr>';
 					}).join('');
 				}
 				strXml += '</p:' + key + 'Style>';
@@ -3398,29 +3383,39 @@ var PptxGenJS = function(useProperLayoutMaster){
 	// NEW End
 
 	// NEW Start
-	// Get right attribute for align based on user input
+	// Get right value for align based on user input
+	// @param {string} attribute
 	// @param {string} align
-	// @return {string} XML attribute
-	function getXmlAlign(value) {
+	// @return {string} XML value
+	function getXmlAlign(attribute, value) {
 		var align = '';
 
 		if (value) {
 			switch ( value ) {
+				case 't':
+				case 'top':
+					align += 't';
+					break;
 				case 'r':
 				case 'right':
-					align += ' algn="r"';
+					align += 'r';
 					break;
 				case 'c':
 				case 'ctr':
 				case 'center':
-					align += ' algn="ctr"';
+					align += 'ctr';
+					break;
+				case 'b':
+				case 'btm':
+				case 'bottom':
+					align += 'b';
 					break;
 				case 'justify':
-					align += ' algn="just"';
+					align += 'just';
 					break;
 			}
 		}
-		return align;
+		return align.length ? ' ' + attribute + '="' + align + '"' : align;
 	}
 	// NEW End
 
@@ -3943,7 +3938,7 @@ var PptxGenJS = function(useProperLayoutMaster){
 					if (gObjPptx.properLayoutMasterInUse && placeholder) {
 						// NEW Start
 						strSlideXml += '<p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr>';
-						strSlideXml += '<p:nvPr><p:ph' + (placeholder.type != PLACEHOLDERS['title'].type ? ' idx="' + placeholder.idx + '"' : '') + ' type="' + placeholder.objectType + '"/></p:nvPr>';
+						strSlideXml += '<p:nvPr><p:ph' + (placeholder.type != PLACEHOLDERS['title'].type ? ' idx="' + placeholder.idx + '"' : '') + (placeholder.objectType != null ? ' type="' + placeholder.objectType + '"' : '') + '/></p:nvPr>';
 						strSlideXml += '</p:nvSpPr>';
 						strSlideXml += '<p:spPr>';
 
