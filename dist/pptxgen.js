@@ -63,7 +63,7 @@ if ( NODEJS ) {
 var PptxGenJS = function(useProperLayoutMaster){
 	// CONSTANTS
 	var APP_VER = "1.8.0-beta";
-	var APP_REL = "20170830";
+	var APP_REL = "20170904";
 	//
 	var MASTER_OBJECTS = {
 		'chart': { name:'chart' },
@@ -161,6 +161,11 @@ var PptxGenJS = function(useProperLayoutMaster){
 			objectName: 'Content Placeholder',
 			objectType: null
 		},
+		footer: {
+			type: 'footer',
+			objectName: 'Footer Placeholder',
+			objectType: 'ftr'
+		},
 		table: {
 			type: 'table',
 			objectName: 'Table Placeholder',
@@ -182,6 +187,22 @@ var PptxGenJS = function(useProperLayoutMaster){
 			objectType: 'media'
 		}
 	};
+
+	const PLACEHOLDERS_TO_INHERIT_FROM_MASTER_SLIDE = [
+		PLACEHOLDERS['title'].type,
+		PLACEHOLDERS['ctrTitle'].type,
+		PLACEHOLDERS['subTitle'].type,
+		PLACEHOLDERS['footer'].type
+	];
+
+	const PLACEHOLDERS_WITH_BODY_PROPERTIES = [
+		PLACEHOLDERS['title'].type,
+		PLACEHOLDERS['ctrTitle'].type,
+		PLACEHOLDERS['subTitle'].type,
+		PLACEHOLDERS['text'].type,
+		PLACEHOLDERS['content'].type,
+		PLACEHOLDERS['footer'].type
+	];
 	// New End
 
 	// A: Create internal pptx object
@@ -279,9 +300,24 @@ var PptxGenJS = function(useProperLayoutMaster){
 			var text = ( text || '' );
 			if ( Array.isArray(text) && text.length == 0 ) text = '';
 
+			// NEW Start
+			// NOTE: If placeholder is assigned some properties will be inherited from its options
+			// ..... These properties will be iherited: 'color', 'valign', 'align', 'lineSpacing' and 'autoFit' and 'shadow'
+			var placeholder = null;
+			if (gObjPptx.properLayoutMasterInUse && opt.placeholderName) {
+				placeholder = getPlaceholder(opt.placeholderName, getLayoutIdxForSlide(target.numb));
+			}
+			// NEW End
+
 			// STEP 2: Set some options
-			// Set color (options > inherit from Slide > default to black)
-			//opt.color = ( opt.color || this.color || '000000' );
+			// Set color (options > inherit from placeholder > inherit from Slide > default from master slide)
+			opt.color = ( opt.color || placeholder && placeholder.options.color || this.color );
+
+			opt.valign = opt.valign || placeholder && placeholder.options.valign;
+			opt.align = opt.align || placeholder && placeholder.options.align;
+			opt.lineSpacing = opt.lineSpacing || placeholder && placeholder.options.align;
+			opt.autoFit = opt.autoFit || placeholder && placeholder.options.autoFit;
+			opt.shadow = opt.shadow || placeholder && placeholder.options.shadow;
 
 			// ROBUST: Convert attr values that will likely be passed by users to valid OOXML values
 			if ( opt.valign ) opt.valign = opt.valign.toLowerCase().replace(/^c.*/i,'ctr').replace(/^m.*/i,'ctr').replace(/^t.*/i,'t').replace(/^b.*/i,'b');
@@ -447,7 +483,7 @@ var PptxGenJS = function(useProperLayoutMaster){
 			return resultObject;
 		},
 		
-		addPlaceholderDefinition: function(index, layoutPlaceholder, target) {
+		addPlaceholderDefinition: function(index, layoutPlaceholder, target, inheritedFromMaster) {
 			if (!PLACEHOLDERS.hasOwnProperty(layoutPlaceholder.type)) {
 				throw Error('Wrong type of placeholder');
 			}
@@ -456,6 +492,7 @@ var PptxGenJS = function(useProperLayoutMaster){
 				id = target.data.length + idx + 1;
 		
 			var placeholder = {
+				inheritedFromMaster: inheritedFromMaster ? inheritedFromMaster : false,
 				id: id,
 				idx: idx,
 				type: layoutPlaceholder.type,
@@ -641,10 +678,25 @@ var PptxGenJS = function(useProperLayoutMaster){
 			
 			// New Start
 			// Add Slide Placeholders
+			var usedPlaceholderTypes = [];
 			if (slideDef.placeholders && Array.isArray(slideDef.placeholders) && slideDef.placeholders.length > 0) {
 				slideDef.placeholders.forEach(function(object, idx) {
 					if (object.type && PLACEHOLDERS[object.type]) {
 						gObjPptxGenerators.addPlaceholderDefinition(idx, object, target);
+
+						if (usedPlaceholderTypes.indexOf(object.type) == -1) {
+							usedPlaceholderTypes.push(object.type);
+						}
+					}
+				});
+			}
+
+			// Inherit placeholders from master slide
+			if (!target.isMaster) {
+				var index = target.placeholders.length;
+				gObjPptx.masterSlide.placeholders.forEach(function(object, idx) {
+					if (object.type && PLACEHOLDERS_TO_INHERIT_FROM_MASTER_SLIDE.indexOf(object.type) != -1 && usedPlaceholderTypes.indexOf(object.type) == -1) {
+						gObjPptxGenerators.addPlaceholderDefinition(++index, object, target, true);
 					}
 				});
 			}
@@ -1144,7 +1196,7 @@ var PptxGenJS = function(useProperLayoutMaster){
 				let x = 0,
 					y = 0,
 					cx = getSmartParseNumber('75%', 'X'),
-					cy = 0;
+					cy = getSmartParseNumber('75%', 'Y');
 
 				let locationAttr = "",
 					shapeType = null,
@@ -1167,107 +1219,6 @@ var PptxGenJS = function(useProperLayoutMaster){
 				if (placeholderObj.options.flipV) locationAttr += ' flipV="1"';
 				if (placeholderObj.options.rotate) locationAttr += ' rot="' + convertRotationDegrees(placeholderObj.options.rotate) + '"';
 
-				// TODO
-				if (placeholderObj.type == PLACEHOLDERS['content'].type) {
-					if (!placeholderObj.options.cx || placeholderObj.options.cx == 0) cx = getSmartParseNumber('100%', 'X');
-					if (!placeholderObj.options.cy || placeholderObj.options.cy == 0) cy = getSmartParseNumber('100%', 'Y');
-
-					strSlideXml += '<p:sp>';
-					strSlideXml += '  <p:nvSpPr>';
-					strSlideXml += '    <p:cNvPr id="' + placeholderObj.id + '" name="Content Placeholder 2"/>';
-					strSlideXml += '      <p:cNvSpPr>';
-					strSlideXml += '        <a:spLocks noGrp="1"/>';
-					strSlideXml += '      </p:cNvSpPr>';
-					strSlideXml += '    <p:nvPr>';
-					strSlideXml += '      <p:ph idx="' + placeholderObj.idx + '"/>';
-					strSlideXml += '    </p:nvPr>';
-					strSlideXml += '  </p:nvSpPr>';
-					//strSlideXml += '  <p:spPr/>';
-					strSlideXml += '  <p:spPr>';
-					strSlideXml += '    <a:xfrm' + locationAttr + '>';
-					strSlideXml += '      <a:off x="' + x + '" y="' + y + '"/>';
-					strSlideXml += '      <a:ext cx="' + cx + '" cy="' + cy + '"/>';
-					strSlideXml += '    </a:xfrm>';
-					strSlideXml += '    <a:prstGeom prst="rect">';
-					strSlideXml += '      <a:avLst/>';
-					strSlideXml += '    </a:prstGeom>';
-					strSlideXml += '  </p:spPr>';
-					strSlideXml += '  <p:txBody>';
-					strSlideXml += '    <a:bodyPr>';
-					strSlideXml += '      <a:normAutofit/>';
-					strSlideXml += '    </a:bodyPr>';
-					strSlideXml += '    <a:lstStyle/>';
-					/*strSlideXml += '    <a:lstStyle>';
-					strSlideXml += '      <a:lvl1pPr>';
-					strSlideXml += '        <a:lnSpc>';
-					strSlideXml += '          <a:spcPct val="120000"/>'
-					strSlideXml += '        </a:lnSpc>';
-					strSlideXml += '        <a:defRPr sz="1200"/>';
-					strSlideXml += '      </a:lvl1pPr>';
-					strSlideXml += '      <a:lvl2pPr>';
-					strSlideXml += '        <a:lnSpc>';
-					strSlideXml += '          <a:spcPct val="120000"/>';
-					strSlideXml += '        </a:lnSpc>';
-					strSlideXml += '        <a:defRPr sz="1100"/>'
-					strSlideXml += '      </a:lvl2pPr>';
-					strSlideXml += '      <a:lvl3pPr>';
-					strSlideXml += '        <a:lnSpc>';
-					strSlideXml += '          <a:spcPct val="120000"/>';
-					strSlideXml += '        </a:lnSpc>';
-					strSlideXml += '        <a:defRPr sz="1000"/>';
-					strSlideXml += '      </a:lvl3pPr>';
-					strSlideXml += '      <a:lvl4pPr>';
-					strSlideXml += '        <a:lnSpc>';
-					strSlideXml += '          <a:spcPct val="120000"/>';
-					strSlideXml += '        </a:lnSpc>';
-					strSlideXml += '        <a:defRPr sz="1000"/>'
-					strSlideXml += '      </a:lvl4pPr>';
-					strSlideXml += '      <a:lvl5pPr>';
-					strSlideXml += '        <a:lnSpc>';
-					strSlideXml += '          <a:spcPct val="120000"/>';
-					strSlideXml += '        </a:lnSpc>';
-					strSlideXml += '        <a:defRPr sz="1000"/>';
-					strSlideXml += '      </a:lvl5pPr>';
-					strSlideXml += '    </a:lstStyle>';*/
-					strSlideXml += '    <a:p>';
-					strSlideXml += '      <a:pPr lvl="0"/>';
-					strSlideXml += '      <a:r>';
-					strSlideXml += '        <a:rPr dirty="0" lang="en-US" smtClean="0"/>';
-					strSlideXml += '        <a:t>Click to edit Master text styles</a:t>';
-					strSlideXml += '      </a:r>';
-					strSlideXml += '    </a:p>';
-					strSlideXml += '    <a:p>';
-					strSlideXml += '      <a:pPr lvl="1"/>';
-					strSlideXml += '      <a:r>';
-					strSlideXml += '        <a:rPr dirty="0" lang="en-US" smtClean="0"/>';
-					strSlideXml += '        <a:t>Second level</a:t>';
-					strSlideXml += '      </a:r>';
-					strSlideXml += '    </a:p>';
-					strSlideXml += '    <a:p>';
-					strSlideXml += '      <a:pPr lvl="2"/>';
-					strSlideXml += '      <a:r>';
-					strSlideXml += '        <a:rPr dirty="0" lang="en-US" smtClean="0"/>';
-					strSlideXml += '        <a:t>Third level</a:t>';
-					strSlideXml += '      </a:r>';
-					strSlideXml += '    </a:p>';
-					strSlideXml += '    <a:p>';
-					strSlideXml += '      <a:pPr lvl="3"/>';
-					strSlideXml += '      <a:r>';
-					strSlideXml += '        <a:rPr dirty="0" lang="en-US" smtClean="0"/>';
-					strSlideXml += '        <a:t>Fourth level</a:t>';
-					strSlideXml += '      </a:r>';
-					strSlideXml += '    </a:p>';
-					strSlideXml += '    <a:p>';
-					strSlideXml += '      <a:pPr lvl="4"/>';
-					strSlideXml += '      <a:r>';
-					strSlideXml += '        <a:rPr dirty="0" lang="en-US" smtClean="0"/>';
-					strSlideXml += '        <a:t>Fifth level</a:t>';
-					strSlideXml += '      </a:r>';
-					strSlideXml += '      <a:endParaRPr dirty="0" lang="en-US"/>';
-					strSlideXml += '    </a:p>';
-					strSlideXml += '  </p:txBody>';
-					strSlideXml += '</p:sp>';
-				} else {
 					strSlideXml += '<p:sp>';
 					strSlideXml += ' <p:nvSpPr>';
 					strSlideXml += '  <p:cNvPr id="' + placeholderObj.id + '" name="' + placeholderObj.objectName + ' ' + placeholderObj.idx + '"/>';
@@ -1277,18 +1228,30 @@ var PptxGenJS = function(useProperLayoutMaster){
 					strSlideXml += '  </p:nvPr>';
 					strSlideXml += ' </p:nvSpPr>';
 
+				if (placeholderObj.inheritedFromMaster) {
+					strSlideXml += '<p:spPr/>';
+				} else {
 					strSlideXml += ' <p:spPr><a:xfrm' + locationAttr + '>';
 					strSlideXml += '  <a:off x="' + x + '" y="' + y + '"/>';
 					strSlideXml += '  <a:ext cx="' + cx + '" cy="' + cy + '"/></a:xfrm>';
+
+					if (placeholderObj.type == PLACEHOLDERS['footer'].type) {
+						strSlideXml += '<a:prstGeom prst="rect">';
+						strSlideXml += '  <a:avLst/>';
+						strSlideXml += '</a:prstGeom>';
+					}
+
 					strSlideXml += ' </p:spPr>';
+				}
 
 					strSlideXml += '  <p:txBody>';
 
-					if (placeholderObj.type == PLACEHOLDERS['title'].type || placeholderObj.type == PLACEHOLDERS['ctrTitle'].type || placeholderObj.type == PLACEHOLDERS['subTitle'].type || placeholderObj.type == PLACEHOLDERS['text'].type) {
-						strSlideXml += '    <a:bodyPr' + getXmlAlign('algn', placeholderObj.options.valign) + '/>';
+				if (!placeholderObj.inheritedFromMaster && PLACEHOLDERS_WITH_BODY_PROPERTIES.indexOf(placeholderObj.type) != -1) {
+					// NOTE: Only the first level of list style is generated
+					strSlideXml += '    <a:bodyPr' + getXmlAlign('anchor', placeholderObj.options.valign) + '/>';
 						strSlideXml += '    <a:lstStyle>';
 						strSlideXml += '      <a:lvl1pPr' + getXmlAlign('algn', placeholderObj.options.align) + '>';
-						strSlideXml += '        ' + gObjPptxGenerators.textRunPropsToXml('a:defRPr', placeholderObj.options);
+						strSlideXml += '        ' + gObjPptxGenerators.textRunPropsToXml('a:defRPr', placeholderObj.options).replace(' lang="en-US"', '');
 						strSlideXml += '      </a:lvl1pPr>';
 						strSlideXml += '    </a:lstStyle>';
 					} else {
@@ -1297,16 +1260,18 @@ var PptxGenJS = function(useProperLayoutMaster){
 					}
 
 					strSlideXml += '    <a:p>';
+
+				if (placeholderObj.type != PLACEHOLDERS['footer'].type) {
 					strSlideXml += '      <a:r>';
 					strSlideXml += '        <a:rPr lang="en-US" smtClean="0"/>';
-					strSlideXml += '        <a:t>' + (placeholderObj.hasOwnProperty('text') ? placeholderObj.text : placeholderObj.objectName) + '</a:t>'
+					strSlideXml += '        <a:t>' + (placeholderObj.hasOwnProperty('text') ? placeholderObj.text : placeholderObj.objectName) + '</a:t>';
 					strSlideXml += '      </a:r>';
+				}
+
 					strSlideXml += '      <a:endParaRPr lang="en-US"/>';
 					strSlideXml += '    </a:p>';
 					strSlideXml += '  </p:txBody>';
 					strSlideXml += '</p:sp>';
-				
-				}
 			});
 			// NEW End
 
@@ -3359,12 +3324,12 @@ var PptxGenJS = function(useProperLayoutMaster){
 
 		locAttr = locAttr.length ? locAttr : locationAttr;
 
-		if (slideObj.type == 'chart') {
+		if (slideObj.type == PLACEHOLDERS['chart'].type) {
 			strXml += '<p:xfrm>';
 			strXml += '<a:off x="' + x + '" y="' + y + '"/>';
 			strXml += '<a:ext cx="' + cx + '" cy="' + cy + '"/>';
 			strXml += '</p:xfrm>';
-		} else if (slideObj.type == 'table') {
+		} else if (slideObj.type == PLACEHOLDERS['table'].type) {
 			strXml += '<p:xfrm>';
 			strXml += ' <a:off  x="' + (x || EMU) + '"  y="' + (y || EMU) + '"/>';
 			strXml += ' <a:ext cx="' + (cx || EMU) + '" cy="' + (cy || EMU) + '"/>';
@@ -3374,6 +3339,8 @@ var PptxGenJS = function(useProperLayoutMaster){
 			strXml += ' <a:off x="' + x + '" y="' + y + '"/>';
 			strXml += ' <a:ext cx="' + cx + '" cy="' + cy + '"/>';
 			strXml += '</a:xfrm>';
+		} else if (slideObj.type == PLACEHOLDERS['footer'].type) {
+			strXml = '<p:xfrm/>';
 		} else {
 			strXml = '<p:xfrm/>';
 		}
@@ -3392,6 +3359,11 @@ var PptxGenJS = function(useProperLayoutMaster){
 
 		if (value) {
 			switch ( value ) {
+				// NOTE: Align 'left' is used to override previous settings
+				case 'l':
+				case 'left':
+					align += 'l';
+					break;
 				case 't':
 				case 'top':
 					align += 't';
@@ -3400,6 +3372,7 @@ var PptxGenJS = function(useProperLayoutMaster){
 				case 'right':
 					align += 'r';
 					break;
+				case 'middle':
 				case 'c':
 				case 'ctr':
 				case 'center':
@@ -4230,32 +4203,6 @@ var PptxGenJS = function(useProperLayoutMaster){
 		strXml += '<p:sldLayoutIdLst>' + layoutDefs.join('') + '</p:sldLayoutIdLst>';
 		strXml += '<p:txStyles>';
 		strXml += (gObjPptxGenerators.defStylesToXml(gObjPptx.masterStyle));
-			// + ' <p:titleStyle>'
-			// + '  <a:lvl1pPr algn="ctr" defTabSz="914400" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:spcBef><a:spcPct val="0"/></a:spcBef><a:buNone/><a:defRPr sz="4400" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mj-lt"/><a:ea typeface="+mj-ea"/><a:cs typeface="+mj-cs"/></a:defRPr></a:lvl1pPr>'
-			// + ' </p:titleStyle>'
-			// + ' <p:bodyStyle>'
-			// + '  <a:lvl1pPr marL="342900" indent="-342900" algn="l" defTabSz="914400" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:spcBef><a:spcPct val="20000"/></a:spcBef><a:buFont typeface="Arial" pitchFamily="34" charset="0"/><a:buChar char="?"/><a:defRPr sz="3200" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl1pPr>'
-			// + '  <a:lvl2pPr marL="742950" indent="-285750" algn="l" defTabSz="914400" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:spcBef><a:spcPct val="20000"/></a:spcBef><a:buFont typeface="Arial" pitchFamily="34" charset="0"/><a:buChar char="?"/><a:defRPr sz="2800" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl2pPr>'
-			// + '  <a:lvl3pPr marL="1143000" indent="-228600" algn="l" defTabSz="914400" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:spcBef><a:spcPct val="20000"/></a:spcBef><a:buFont typeface="Arial" pitchFamily="34" charset="0"/><a:buChar char="?"/><a:defRPr sz="2400" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl3pPr>'
-			// + '  <a:lvl4pPr marL="1600200" indent="-228600" algn="l" defTabSz="914400" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:spcBef><a:spcPct val="20000"/></a:spcBef><a:buFont typeface="Arial" pitchFamily="34" charset="0"/><a:buChar char="?"/><a:defRPr sz="2000" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl4pPr>'
-			// + '  <a:lvl5pPr marL="2057400" indent="-228600" algn="l" defTabSz="914400" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:spcBef><a:spcPct val="20000"/></a:spcBef><a:buFont typeface="Arial" pitchFamily="34" charset="0"/><a:buChar char="?"/><a:defRPr sz="2000" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl5pPr>'
-			// + '  <a:lvl6pPr marL="2514600" indent="-228600" algn="l" defTabSz="914400" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:spcBef><a:spcPct val="20000"/></a:spcBef><a:buFont typeface="Arial" pitchFamily="34" charset="0"/><a:buChar char="?"/><a:defRPr sz="2000" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl6pPr>'
-			// + '  <a:lvl7pPr marL="2971800" indent="-228600" algn="l" defTabSz="914400" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:spcBef><a:spcPct val="20000"/></a:spcBef><a:buFont typeface="Arial" pitchFamily="34" charset="0"/><a:buChar char="?"/><a:defRPr sz="2000" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl7pPr>'
-			// + '  <a:lvl8pPr marL="3429000" indent="-228600" algn="l" defTabSz="914400" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:spcBef><a:spcPct val="20000"/></a:spcBef><a:buFont typeface="Arial" pitchFamily="34" charset="0"/><a:buChar char="?"/><a:defRPr sz="2000" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl8pPr>'
-			// + '  <a:lvl9pPr marL="3886200" indent="-228600" algn="l" defTabSz="914400" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:spcBef><a:spcPct val="20000"/></a:spcBef><a:buFont typeface="Arial" pitchFamily="34" charset="0"/><a:buChar char="?"/><a:defRPr sz="2000" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl9pPr>'
-			// + ' </p:bodyStyle>'
-			// + ' <p:otherStyle>'
-			// + '  <a:defPPr><a:defRPr lang="en-US"/></a:defPPr>'
-			// + '  <a:lvl1pPr marL="0" algn="l" defTabSz="914400" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:defRPr sz="1800" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl1pPr>'
-			// + '  <a:lvl2pPr marL="457200" algn="l" defTabSz="914400" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:defRPr sz="1800" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl2pPr>'
-			// + '  <a:lvl3pPr marL="914400" algn="l" defTabSz="914400" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:defRPr sz="1800" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl3pPr>'
-			// + '  <a:lvl4pPr marL="1371600" algn="l" defTabSz="914400" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:defRPr sz="1800" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl4pPr>'
-			// + '  <a:lvl5pPr marL="1828800" algn="l" defTabSz="914400" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:defRPr sz="1800" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl5pPr>'
-			// + '  <a:lvl6pPr marL="2286000" algn="l" defTabSz="914400" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:defRPr sz="1800" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl6pPr>'
-			// + '  <a:lvl7pPr marL="2743200" algn="l" defTabSz="914400" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:defRPr sz="1800" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl7pPr>'
-			// + '  <a:lvl8pPr marL="3200400" algn="l" defTabSz="914400" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:defRPr sz="1800" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl8pPr>'
-			// + '  <a:lvl9pPr marL="3657600" algn="l" defTabSz="914400" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:defRPr sz="1800" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl9pPr>'
-			// + ' </p:otherStyle>'
 		strXml += '</p:txStyles>'
 		strXml += '</p:sldMaster>';
 		return strXml;
@@ -5017,6 +4964,7 @@ var PptxGenJS = function(useProperLayoutMaster){
 	 */
 	this.setMasterSlide = function setMasterSlide(masterDef, masterStyle) {
 		var slideObj = {
+			isMaster: true,
 			slide: masterDef,
 			data: [],
 			placeholders: [],
