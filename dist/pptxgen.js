@@ -207,7 +207,8 @@ var PptxGenJS = function(){
 		PLACEHOLDERS['subTitle'].type,
 		PLACEHOLDERS['text'].type,
 		PLACEHOLDERS['content'].type,
-		PLACEHOLDERS['footer'].type
+		PLACEHOLDERS['footer'].type,
+		PLACEHOLDERS['sldNum'].type,
 	];
 	// New End
 
@@ -1252,7 +1253,7 @@ var PptxGenJS = function(){
 					strSlideXml += '  <a:off x="' + x + '" y="' + y + '"/>';
 					strSlideXml += '  <a:ext cx="' + cx + '" cy="' + cy + '"/></a:xfrm>';
 
-					if (placeholderObj.type == PLACEHOLDERS['footer'].type) {
+					if (placeholderObj.type == PLACEHOLDERS['footer'].type || placeholderObj.type == PLACEHOLDERS['sldNum'].type) {
 						strSlideXml += '<a:prstGeom prst="rect">';
 						strSlideXml += '  <a:avLst/>';
 						strSlideXml += '</a:prstGeom>';

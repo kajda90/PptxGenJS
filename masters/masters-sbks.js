@@ -106,6 +106,17 @@ const MASTER_FILE = {
 						h: '4%',
 						font_size: 9
 					}
+				}, {
+					type: 'sldNum',
+					name: 'slideNumber',
+					options: {
+						x: '95%',
+						y: '93%',
+						w: '6%',
+						h: '4%',
+						align:'right',
+						font_size: 9,
+					},
 				}
 			]
 		},
@@ -123,6 +134,7 @@ const MASTER_FILE = {
 	},
 	INTRO_SLIDE: {
 		title: 'Socialbakers Title Slide',
+		hasSlideNumber: false,
 		objects: [{
 			image: {
 				x: 0,
@@ -166,6 +178,7 @@ const MASTER_FILE = {
 	},
 	TITLE_ONLY: {
 		title: 'Socialbakers Section Header',
+		hasSlideNumber: false,
 		objects: [].concat(_footerBar),
 		placeholders: [
 			{
