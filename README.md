@@ -1030,6 +1030,26 @@ The following color names are accepted:
 * `lt1` and `lt2` (light) referred as color constants `BACKGROUND1` and `BACKGROUND2`,
 * `accent1` to `accent6` referred as color constants `ACCENT1` to `ACCENT6`,
 
+## Adding Slide Numbers
+Define a slide number placeholder `sldNum` in the master file
+```javascript
+pptx.setMasterSlide({
+  ...
+  placeholders: [{
+    type: 'sldNum',
+    name: 'slideNumber',
+    options: {x: 6, y: 4, w: 1, h: 0.3}
+  }]
+});
+```
+All slide layouts (created by `pptx.addLayoutSlide`) inherit this placeholder by default. If the slide numbering is not required for a particular layout,
+it can be suppressed by property `hasSlideNumber`:
+```javascript
+pptx.addLayoutSlide({
+  title: 'Layout without slide number',
+  hasSlideNumber: false
+});
+```
 
 **************************************************************************************************
 # Table-to-Slides Feature

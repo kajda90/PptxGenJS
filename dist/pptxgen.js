@@ -133,7 +133,7 @@ var PptxGenJS = function(useProperLayoutMaster){
 	};
 	var DEF_COLOR_THEME = { dk1: '000000', lt1: 'FFFFFF', dk2: 'A7A7A7', lt2: '535353', accent1: '4F81BD', accent2: 'C0504D', accent3: '9BBB59', accent4: '8064A2', accent5: '4BACC6', accent6: 'F79646', hlink: '0000FF', folHlink: 'FF00FF' };
 	var LAYOUT_IDX_SERIES_BASE = 2147483649;
-	
+
 	// NEW Start
 	var PLACEHOLDERS = {
 		title: {
@@ -185,6 +185,11 @@ var PptxGenJS = function(useProperLayoutMaster){
 			type: 'media',
 			objectName: 'Media Placeholder',
 			objectType: 'media'
+		},
+		sldNum: {
+			type: 'sldNum',
+			objectName: 'Slide Number Placeholder',
+			objectType: 'sldNum'
 		}
 	};
 
@@ -192,7 +197,8 @@ var PptxGenJS = function(useProperLayoutMaster){
 		PLACEHOLDERS['title'].type,
 		PLACEHOLDERS['ctrTitle'].type,
 		PLACEHOLDERS['subTitle'].type,
-		PLACEHOLDERS['footer'].type
+		PLACEHOLDERS['footer'].type,
+		PLACEHOLDERS['sldNum'].type,
 	];
 
 	const PLACEHOLDERS_WITH_BODY_PROPERTIES = [
@@ -482,7 +488,7 @@ var PptxGenJS = function(useProperLayoutMaster){
 			target.data.push(resultObject);
 			return resultObject;
 		},
-		
+
 		addPlaceholderDefinition: function(index, layoutPlaceholder, target, inheritedFromMaster) {
 			if (!PLACEHOLDERS.hasOwnProperty(layoutPlaceholder.type)) {
 				throw Error('Wrong type of placeholder');
@@ -490,7 +496,7 @@ var PptxGenJS = function(useProperLayoutMaster){
 
 			var idx = index + 1,
 				id = target.data.length + idx + 1;
-		
+
 			var placeholder = {
 				inheritedFromMaster: inheritedFromMaster ? inheritedFromMaster : false,
 				id: id,
@@ -505,7 +511,7 @@ var PptxGenJS = function(useProperLayoutMaster){
 			if (layoutPlaceholder.hasOwnProperty('text')) {
 				placeholder.text = layoutPlaceholder.text;
 			}
-			
+
 			target.placeholders.push(placeholder);
 
 			return placeholder;
@@ -675,7 +681,7 @@ var PptxGenJS = function(useProperLayoutMaster){
 			if ( slideDef.slideNumber && typeof slideDef.slideNum ) {
 				target.slideNumberObj = slideDef.slideNumber;
 			};
-			
+
 			// New Start
 			// Add Slide Placeholders
 			var usedPlaceholderTypes = [];
@@ -696,7 +702,20 @@ var PptxGenJS = function(useProperLayoutMaster){
 				var index = target.placeholders.length;
 				gObjPptx.masterSlide.placeholders.forEach(function(object, idx) {
 					if (object.type && PLACEHOLDERS_TO_INHERIT_FROM_MASTER_SLIDE.indexOf(object.type) != -1 && usedPlaceholderTypes.indexOf(object.type) == -1) {
-						gObjPptxGenerators.addPlaceholderDefinition(++index, object, target, true);
+						var inheritPlaceholder = true;
+
+						if (object.type == 'sldNum') {
+							if (slideDef.hasSlideNumber === false) {  // slide number is suppressed for this SlideLayout
+								inheritPlaceholder = false;
+							}
+							else {
+								target.hasSlideNumber = true;  // slide number is inherited by default
+							}
+						}
+
+						if (inheritPlaceholder) {
+							gObjPptxGenerators.addPlaceholderDefinition(++index, object, target, true);
+						}
 					}
 				});
 			}
@@ -1244,7 +1263,7 @@ var PptxGenJS = function(useProperLayoutMaster){
 					strSlideXml += ' </p:spPr>';
 				}
 
-					strSlideXml += '  <p:txBody>';
+				strSlideXml += '  <p:txBody>';
 
 				if (!placeholderObj.inheritedFromMaster && PLACEHOLDERS_WITH_BODY_PROPERTIES.indexOf(placeholderObj.type) != -1) {
 					// NOTE: Only the first level of list style is generated
@@ -1262,16 +1281,24 @@ var PptxGenJS = function(useProperLayoutMaster){
 					strSlideXml += '    <a:p>';
 
 				if (placeholderObj.type != PLACEHOLDERS['footer'].type) {
-					strSlideXml += '      <a:r>';
-					strSlideXml += '        <a:rPr lang="en-US" smtClean="0"/>';
-					strSlideXml += '        <a:t>' + (placeholderObj.hasOwnProperty('text') ? placeholderObj.text : placeholderObj.objectName) + '</a:t>';
-					strSlideXml += '      </a:r>';
+					if (placeholderObj.type == PLACEHOLDERS['sldNum'].type) {
+						strSlideXml += '      <a:fld id="' + SLDNUMFLDID + '" type="slidenum">';
+						strSlideXml += '        <a:rPr lang="en-US" smtClean="0"/>';
+						strSlideXml += '        <a:t>‹#›</a:t>';
+						strSlideXml += '      </a:fld>';
+					}
+					else {
+						strSlideXml += '      <a:r>';
+						strSlideXml += '        <a:rPr lang="en-US" smtClean="0"/>';
+						strSlideXml += '        <a:t>' + (placeholderObj.hasOwnProperty('text') ? placeholderObj.text : placeholderObj.objectName) + '</a:t>';
+						strSlideXml += '      </a:r>';
+					}
 				}
 
-					strSlideXml += '      <a:endParaRPr lang="en-US"/>';
-					strSlideXml += '    </a:p>';
-					strSlideXml += '  </p:txBody>';
-					strSlideXml += '</p:sp>';
+				strSlideXml += '      <a:endParaRPr lang="en-US"/>';
+				strSlideXml += '    </a:p>';
+				strSlideXml += '  </p:txBody>';
+				strSlideXml += '</p:sp>';
 			});
 			// NEW End
 
@@ -2350,7 +2377,7 @@ var PptxGenJS = function(useProperLayoutMaster){
 			}
 		});
 	}
-	
+
 	// NEW Start
 	/**
 	 * @param {String} Name of placeholder defined in concrete layout object
@@ -3208,6 +3235,9 @@ var PptxGenJS = function(useProperLayoutMaster){
 		var xmlTextRun = '';
 		var paraProp = '';
 		var parsedText;
+		var isSlideNumber = gObjPptx.properLayoutMasterInUse && opts.placeholder && 'sldNum' === opts.placeholder.type;
+		var openTag = isSlideNumber ? '<a:fld id="' + SLDNUMFLDID + '" type="slidenum">' : '<a:r>';
+		var closeTag = isSlideNumber ? '</a:fld>' : '</a:r>';
 
 		// BEGIN runProperties
 		var startInfo = gObjPptxGenerators.textRunPropsToXml('a:rPr', opts);
@@ -3217,20 +3247,20 @@ var PptxGenJS = function(useProperLayoutMaster){
 		if ( parsedText.length > 1 ) {
 			var outTextData = '';
 			for ( var i = 0, total_size_i = parsedText.length; i < total_size_i; i++ ) {
-				outTextData += '<a:r>' + startInfo+ '<a:t>' + decodeXmlEntities(parsedText[i]);
+				outTextData += openTag + startInfo+ '<a:t>' + decodeXmlEntities(parsedText[i]);
 				// Stop/Start <p>aragraph as long as there is more lines ahead (otherwise its closed at the end of this function)
-				if ( (i + 1) < total_size_i ) outTextData += (opts.breakLine ? CRLF : '') + '</a:t></a:r>';
+				if ( (i + 1) < total_size_i ) outTextData += (opts.breakLine ? CRLF : '') + '</a:t>' + closeTag;
 			}
 			xmlTextRun = outTextData;
 		}
 		else {
 			// Handle cases where addText `text` was an array of objects - if a text object doesnt contain a '\n' it still need alignment!
 			// The first pPr-align is done in makeXml - use line countr to ensure we only add subsequently as needed
-			xmlTextRun = ( (opts.align && opts.lineIdx > 0) ? paraProp : '') + '<a:r>' + startInfo+ '<a:t>' + decodeXmlEntities(text_string);
+			xmlTextRun = ( (opts.align && opts.lineIdx > 0) ? paraProp : '') + openTag + startInfo + '<a:t>' + decodeXmlEntities(text_string);
 		}
 
 		// Return paragraph with text run
-		return xmlTextRun + '</a:t></a:r>';
+		return xmlTextRun + '</a:t>' + closeTag;
 	}
 
 	/**
@@ -3335,10 +3365,12 @@ var PptxGenJS = function(useProperLayoutMaster){
 			strXml += ' <a:ext cx="' + (cx || EMU) + '" cy="' + (cy || EMU) + '"/>';
 			strXml += '</p:xfrm>';
 		} else if (!(placeholder.options.hasOwnProperty('x') || placeholder.options.hasOwnProperty('y') || placeholder.options.hasOwnProperty('w') || placeholder.options.hasOwnProperty('h'))) {
-			strXml += '<a:xfrm' + locationAttr + '>';
-			strXml += ' <a:off x="' + x + '" y="' + y + '"/>';
-			strXml += ' <a:ext cx="' + cx + '" cy="' + cy + '"/>';
-			strXml += '</a:xfrm>';
+            if (placeholder.type !== 'sldNum') {
+                strXml += '<a:xfrm' + locationAttr + '>';
+                strXml += ' <a:off x="' + x + '" y="' + y + '"/>';
+                strXml += ' <a:ext cx="' + cx + '" cy="' + cy + '"/>';
+                strXml += '</a:xfrm>';
+            }
 		} else if (slideObj.type == PLACEHOLDERS['footer'].type) {
 			strXml = '<p:xfrm/>';
 		} else {
@@ -3578,9 +3610,15 @@ var PptxGenJS = function(useProperLayoutMaster){
 
 		// NEW Start
 		var layoutIdx = null;
+		var layoutDef;
 
 		if (gObjPptx.properLayoutMasterInUse) {
 			layoutIdx = getLayoutIdxForSlide(intSlideNum);
+			layoutDef = getLayoutByName(inSlide.layout);
+
+			if (layoutDef && layoutDef.hasSlideNumber) {
+				gObjPptxGenerators.addTextDefinition("0", {placeholderName: getPlaceholderName(layoutDef, 'sldNum')}, inSlide);
+			}
 		}
 		// NEW End
 
@@ -3613,7 +3651,7 @@ var PptxGenJS = function(useProperLayoutMaster){
 		inSlide.data.forEach(function(slideObj, idx) {
 			var x = 0, y = 0, cx = getSmartParseNumber('75%','X'), cy = 0;
 			var locationAttr = "", shapeType = null, placeholder = null;
-			
+
 			// NEW Start
 			if (gObjPptx.properLayoutMasterInUse && slideObj.options.placeholderName && layoutIdx) {
 				placeholder = getPlaceholder(slideObj.options.placeholderName, layoutIdx);
@@ -3915,6 +3953,7 @@ var PptxGenJS = function(useProperLayoutMaster){
 						strSlideXml += '</p:nvSpPr>';
 						strSlideXml += '<p:spPr>';
 
+						slideObj.options.placeholder = placeholder  // keep reference for genXmlTextBody
 						strSlideXml += getXmlTransform(slideObj, locationAttr, x, y, cx, cy, placeholder);
 						// NEW End
 					} else {
@@ -3985,7 +4024,7 @@ var PptxGenJS = function(useProperLayoutMaster){
 					} else {
 						strSlideXml += '  <p:nvPr/>';
 					}
-					
+
 					strSlideXml += '  </p:nvPicPr>';
 					strSlideXml += '<p:blipFill><a:blip r:embed="rId' + slideObj.imageRid + '" cstate="print"/><a:stretch><a:fillRect/></a:stretch></p:blipFill>';
 					strSlideXml += '<p:spPr>'
@@ -3998,7 +4037,7 @@ var PptxGenJS = function(useProperLayoutMaster){
 						strSlideXml += '  <a:ext cx="' + cx + '" cy="' + cy + '"/>'
 						strSlideXml += ' </a:xfrm>'
 					}
-					
+
 					strSlideXml += ' <a:prstGeom prst="rect"><a:avLst/></a:prstGeom>'
 					strSlideXml += '</p:spPr>';
 					strSlideXml += '</p:pic>';
@@ -4023,7 +4062,7 @@ var PptxGenJS = function(useProperLayoutMaster){
 						strSlideXml += '  <a:videoFile r:link="rId'+ slideObj.mediaRid +'"/>';
 							strSlideXml += ' </p:nvPr>';
 						}
-						
+
 						strSlideXml += ' </p:nvPicPr>';
 						strSlideXml += ' <p:blipFill><a:blip r:embed="rId'+ (slideObj.mediaRid+2) +'"/><a:stretch><a:fillRect/></a:stretch></p:blipFill>'; // NOTE: Preview image is required!
 						strSlideXml += ' <p:spPr>';
@@ -4036,7 +4075,7 @@ var PptxGenJS = function(useProperLayoutMaster){
 							strSlideXml += '   <a:ext cx="' + cx + '" cy="' + cy + '"/>';
 							strSlideXml += '  </a:xfrm>';
 						}
-						
+
 						strSlideXml += '  <a:prstGeom prst="rect"><a:avLst/></a:prstGeom>';
 						strSlideXml += ' </p:spPr>';
 						strSlideXml += '</p:pic>';
@@ -4057,7 +4096,7 @@ var PptxGenJS = function(useProperLayoutMaster){
 							strSlideXml += ' <p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr>';
 							strSlideXml += ' <p:nvPr>';
 						}
-						
+
 						strSlideXml += '  <a:videoFile r:link="rId' + slideObj.mediaRid + '"/>';
 						strSlideXml += '  <p:extLst>';
 						strSlideXml += '   <p:ext uri="{DAA4B4D4-6D71-4841-9C94-3DE7FCFB9230}">';
@@ -4077,7 +4116,7 @@ var PptxGenJS = function(useProperLayoutMaster){
 							strSlideXml += '   <a:ext cx="' + cx + '" cy="' + cy + '"/>';
 							strSlideXml += '  </a:xfrm>';
 						}
-						
+
 						strSlideXml += '  <a:prstGeom prst="rect"><a:avLst/></a:prstGeom>';
 						strSlideXml += ' </p:spPr>';
 						strSlideXml += '</p:pic>';
@@ -4192,7 +4231,7 @@ var PptxGenJS = function(useProperLayoutMaster){
 		var strSlideXml = gObjPptxGenerators.slideObjectToXml(slideObject);
 
 		// pass layouts as static rels because they are not referrenced any time
-		var layoutDefs = gObjPptx.layoutDefinitions.map(function(layoutDef, idx) {
+		var layoutDefs = gObjPptx.layoutDefinitions.map(function(getPlace, idx) {
 			return '<p:sldLayoutId id="' + (LAYOUT_IDX_SERIES_BASE + idx) + '" r:id="rId' + (slideObject.rels.length + idx + 1) + '" />';
 		});
 
@@ -4201,6 +4240,12 @@ var PptxGenJS = function(useProperLayoutMaster){
 		strXml += strSlideXml;
 		strXml += '<p:clrMap bg1="lt1" tx1="dk1" bg2="lt2" tx2="dk2" accent1="accent1" accent2="accent2" accent3="accent3" accent4="accent4" accent5="accent5" accent6="accent6" hlink="hlink" folHlink="folHlink" />'
 		strXml += '<p:sldLayoutIdLst>' + layoutDefs.join('') + '</p:sldLayoutIdLst>';
+
+		if (slideObject.placeholders.some(function(placeholder) {return 'sldNum' === placeholder.type})) {
+			// Manually added slide in PowerPoint (from layout with Slide Number) will have slide number
+			strXml += '<p:hf hdr="0" ftr="0" dt="0"/>';
+		}
+
 		strXml += '<p:txStyles>';
 		strXml += (gObjPptxGenerators.defStylesToXml(gObjPptx.masterStyle));
 		strXml += '</p:txStyles>'
@@ -4249,6 +4294,27 @@ var PptxGenJS = function(useProperLayoutMaster){
 			masterSlideObject,
 			defaultRels
 		);
+	}
+
+	function getPlaceholderName(layoutDef, placeholderType) {
+		var placeholder;
+		var name;
+
+		if (layoutDef.placeholders) {
+			placeholder = layoutDef.placeholders.find(function(item) {return item.type === placeholderType});
+			name = placeholder && placeholder.name
+		}
+
+		return name;
+	}
+
+	/**
+	 * Finds a layout definition
+	 * @param {String} layoutName
+	 * @return {Object} layout definition
+	 */
+	function getLayoutByName(layoutName) {
+		return gObjPptx.layoutDefinitions.find(function(item) {return item.name === layoutName});
 	}
 
 	/**
