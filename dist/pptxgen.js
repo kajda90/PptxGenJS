@@ -234,7 +234,7 @@ var PptxGenJS = function(useProperLayoutMaster){
 		placeholders: []
 	};
 	/** @type {object} specifies data for txStyles element in master file */
-	gObjPptx.masterStyle = null;
+	gObjPptx.masterStyle = {};
 	/** @type {object} specifies name and colors of a theme */
 	gObjPptx.theme = { name: 'Office', colors: {} };
 	/** @type {object[]} slide layout definition objects, used for generating slide layout files */
