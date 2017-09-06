@@ -110,7 +110,7 @@ const MASTER_FILE = {
 					type: 'sldNum',
 					name: 'slideNumber',
 					options: {
-						x: '95%',
+						x: '93%',
 						y: '93%',
 						w: '6%',
 						h: '4%',
