@@ -251,6 +251,8 @@ var PptxGenJS = function(){
 	this.masters = ( typeof gObjPptxMasters !== 'undefined' ? gObjPptxMasters : {} );
 	this.shapes  = ( typeof gObjPptxShapes  !== 'undefined' ? gObjPptxShapes  : BASE_SHAPES );
 
+	var SCHEME_COLOR_NAMES = Object.keys(this.colors).map(function(clrKey) {return this.colors[clrKey]}.bind(this));
+
 	// D: Fall back to base shapes if shapes file was not linked
 	gObjPptxShapes = ( gObjPptxShapes || this.shapes );
 
@@ -1850,7 +1852,12 @@ var PptxGenJS = function(){
 	 * innerElements (optional string): Additional elements that adjust the color and are enclosed by the color element.
 	 */
 	function createColorElement(colorStr, innerElements) {
-		var tagName = REGEX_HEX_COLOR.test(colorStr) ? 'srgbClr' : 'schemeClr';
+		var isHexaRgb = REGEX_HEX_COLOR.test(colorStr);
+		if (!isHexaRgb && SCHEME_COLOR_NAMES.indexOf(colorStr) === -1) {
+			console.warn('"' + colorStr + '" is not a valid scheme color or hexa RGB, black is used as a fallback. 6-digit RGB or these values are accepted: ' + SCHEME_COLOR_NAMES.join(', '));
+			colorStr = '000000';
+		}
+		var tagName = isHexaRgb ? 'srgbClr' : 'schemeClr';
 		var colorAttr = ' val="'+ colorStr +'"';
 		return innerElements ? '<a:'+ tagName + colorAttr +'>'+ innerElements +'</a:'+ tagName +'>' : '<a:'+ tagName + colorAttr +' />';
 	}
