@@ -703,6 +703,9 @@ var PptxGenJS = function(){
 			// Inherit placeholders from master slide
 			if (!target.isMaster) {
 				var index = target.placeholders.length;
+				if (usedPlaceholderTypes.indexOf('sldNum') !== -1) {
+					target.hasSlideNumber = true  // placeholder sldNum is explicitly defined for layout
+				}
 				gObjPptx.masterSlide.placeholders.forEach(function(object, idx) {
 					if (object.type && PLACEHOLDERS_TO_INHERIT_FROM_MASTER_SLIDE.indexOf(object.type) != -1 && usedPlaceholderTypes.indexOf(object.type) == -1) {
 						var inheritPlaceholder = true;
