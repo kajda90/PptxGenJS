@@ -2297,6 +2297,10 @@ var PptxGenJS = function(){
 	 * @see http://officeopenxml.com/drwSp-effects.php
 	 */
 	function createShadowElement(opts, defaults) {
+		if ('none' === opts) {
+			return '<a:effectLst />';
+		}
+
 		var type            = ( opts.type            || defaults.type    ),
 			blur            = ( opts.blur            || defaults.blur    ) * ONEPT,
 			offset          = ( opts.offset          || defaults.offset  ) * ONEPT,
@@ -2306,11 +2310,13 @@ var PptxGenJS = function(){
 			rotateWithShape = ( opts.rotateWithShape || defaults.rotateWithShape || 0),
 			strXml  = "";
 
+		strXml += '<a:effectLst>';
 		strXml += '<a:'+ type +'Shdw sx="100000" sy="100000" kx="0" ky="0" ';
 		strXml += ' algn="bl" rotWithShape="'+ (+rotateWithShape) +'" blurRad="'+ blur +'" ';
 		strXml += ' dist="'+ offset +'" dir="'+ angle +'">';
 		strXml += createColorElement(color, '<a:alpha val="'+ opacity +'"/>');
 		strXml += '</a:'+ type +'Shdw>';
+		strXml += '</a:effectLst>';
 
 		return strXml;
 	}
@@ -2606,11 +2612,7 @@ var PptxGenJS = function(){
 					else if ( rel.opts.dataBorder ) {
 						strXml += '<a:ln w="'+ (rel.opts.dataBorder.pt * ONEPT) +'" cap="flat"><a:solidFill>'+ createColorElement(rel.opts.dataBorder.color) +'</a:solidFill><a:prstDash val="solid"/><a:round/></a:ln>';
 					}
-					if ( rel.opts.lineShadow !== 'none' ) {
-						strXml += '<a:effectLst>';
-						strXml += createShadowElement(rel.opts.lineShadow || {}, DEF_LINE_SHADOW);
-						strXml += '</a:effectLst>';
-					}
+					strXml += createShadowElement(rel.opts.lineShadow || 'none', DEF_LINE_SHADOW);
 					strXml += '  </c:spPr>';
 
 					// LINE CHART ONLY: `marker`
@@ -2621,7 +2623,7 @@ var PptxGenJS = function(){
 						strXml += '  <c:spPr>';
 	  					strXml += '    <a:solidFill>' + createColorElement(rel.opts.chartColors[(idx+1 > rel.opts.chartColors.length ? (Math.floor(Math.random() * rel.opts.chartColors.length)) : idx)]) +'</a:solidFill>';
 						strXml += '    <a:ln w="9525" cap="flat"><a:solidFill>'+ createColorElement(strSerColor) +'</a:solidFill><a:prstDash val="solid"/><a:round/></a:ln>';
-						strXml += '    <a:effectLst/>';
+						strXml += 	   createShadowElement(rel.opts.lineShadow || 'none', DEF_LINE_SHADOW);
 						strXml += '  </c:spPr>';
 						strXml += '</c:marker>';
 					}
@@ -4001,11 +4003,7 @@ var PptxGenJS = function(){
 					}
 
 					// EFFECTS > SHADOW: REF: @see http://officeopenxml.com/drwSp-effects.php
-					if ( slideObj.options.shadow ) {
-						strSlideXml += '<a:effectLst>';
-						strSlideXml += createShadowElement(slideObj.options.shadow, DEF_TEXT_SHADOW);
-						strSlideXml += '</a:effectLst>';
-					}
+					strSlideXml += createShadowElement(slideObj.options.shadow || 'none', DEF_TEXT_SHADOW);
 
 					/* FIXME: FUTURE: Text wrapping (copied from MS-PPTX export)
 					// Commented out b/c i'm not even sure this works - current code produces text that wraps in shapes and textboxes, so...
