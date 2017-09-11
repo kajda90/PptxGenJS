@@ -2643,13 +2643,7 @@ var PptxGenJS = function(){
 							strXml += '    <a:solidFill>';
 							strXml +=       createColorElement(colors[index % colors.length]);
 							strXml += '    </a:solidFill>';
-							strXml += '    <a:effectLst>';
-							strXml += '    <a:outerShdw blurRad="38100" dist="23000" dir="5400000" algn="tl">';
-							strXml += '    	<a:srgbClr val="000000">';
-							strXml += '    	<a:alpha val="35000"/>';
-							strXml += '    	</a:srgbClr>';
-							strXml += '    </a:outerShdw>';
-							strXml += '    </a:effectLst>';
+							strXml += 	   createShadowElement(rel.opts.lineShadow || 'none', DEF_LINE_SHADOW);
 							strXml += '    </c:spPr>';
 							strXml += '  </c:dPt>';
 						});
