@@ -133,17 +133,10 @@ const MASTER_FILE = {
 		}
 	},
 	INTRO_SLIDE: {
-		title: 'Socialbakers Title Slide',
+		title: 'Title Slide',
+		type: 'title',
 		hasSlideNumber: false,
-		objects: [{
-			image: {
-				x: 0,
-				y: 0,
-				w: '100%',
-				h: '100%',
-				data: BACKGROUNDS.TITLE_SLIDE.data
-			}
-		}].concat(_footerBar),
+		objects: [].concat(_footerBar),
 		placeholders: [
 			{
 				type: 'title',
@@ -176,14 +169,175 @@ const MASTER_FILE = {
 			}
 		]
 	},
-	TITLE_ONLY: {
-		title: 'Socialbakers Section Header',
-		hasSlideNumber: false,
+	TITLE_AND_CONTENT: {
+		title: 'Title and Content',
+		type: 'obj',
 		objects: [].concat(_footerBar),
 		placeholders: [
 			{
 				type: 'title',
-				text: 'Click to edit title',
+				text: 'Click to add title',
+				name: 'title',
+				options: {
+					x: '3%',
+					y: '3.5%',
+					w: '94%',
+					h: '7.5%'
+				}
+			}, {
+				type: 'content',
+				text: 'Click to add text',
+				name: 'content',
+				options: {
+					x: '3%',
+					y: '12%',
+					w: '94%',
+					h: '76.5%',
+					valign: 'top',
+				}
+			}
+		]
+	},
+	SECOND_HEADER: {
+		title: 'Section Header',
+		type: 'secHead',
+		objects: [].concat(_footerBar),
+		placeholders: [
+			{
+				type: 'title',
+				text: 'Click to add title',
+				name: 'title',
+				options: {
+					x: '3%',
+					y: '3.5%',
+					w: '94%',
+					h: '7.5%'
+				}
+			}, {
+				type: 'text',
+				text: 'Click to edit text',
+				name: 'text',
+				options: {
+					x: '3%',
+					y: '12%',
+					w: '94%',
+					h: '4%',
+					valign: 'top',
+				}
+			}
+		]
+	},
+	TWO_CONTENT: {
+		title: 'Two Content',
+		type: 'twoObj',
+		objects: [].concat(_footerBar),
+		placeholders: [
+			{
+				type: 'title',
+				text: 'Click to add title',
+				name: 'title',
+				options: {
+					x: '3%',
+					y: '3.5%',
+					w: '94%',
+					h: '7.5%'
+				}
+			}, {
+				type: 'content',
+				text: 'Click to add text',
+				name: 'content_one',
+				options: {
+					x: '3%',
+					y: '12%',
+					w: '46%',
+					h: '76.5%',
+					valign: 'top',
+				}
+			}, {
+				type: 'content',
+				text: 'Click to add text',
+				name: 'content_two',
+				options: {
+					x: '51%',
+					y: '12%',
+					w: '46%',
+					h: '76.5%',
+					valign: 'top',
+				}
+			}
+		]
+	},
+	COMPARISON: {
+		title: 'Comparison',
+		type: 'twoTxTwoObj',
+		objects: [].concat(_footerBar),
+		placeholders: [
+			{
+				type: 'title',
+				text: 'Click to add title',
+				name: 'title',
+				options: {
+					x: '3%',
+					y: '3.5%',
+					w: '94%',
+					h: '7.5%'
+				}
+			}, {
+				type: 'text',
+				text: 'Click to edit text',
+				name: 'text_one',
+				options: {
+					x: '3%',
+					y: '12%',
+					w: '46%',
+					h: '4%',
+					valign: 'top',
+				}
+			}, {
+				type: 'text',
+				text: 'Click to edit text',
+				name: 'text_two',
+				options: {
+					x: '51%',
+					y: '12%',
+					w: '46%',
+					h: '4%',
+					valign: 'top',
+				}
+			}, {
+				type: 'content',
+				text: 'Click to add text',
+				name: 'content_one',
+				options: {
+					x: '3%',
+					y: '20%',
+					w: '46%',
+					h: '68.5%',
+					valign: 'top',
+				}
+			}, {
+				type: 'content',
+				text: 'Click to add text',
+				name: 'content_two',
+				options: {
+					x: '51%',
+					y: '20%',
+					w: '46%',
+					h: '68ß.5%',
+					valign: 'top',
+				}
+			}
+		]
+	},
+	TITLE_ONLY: {
+		title: 'Title Only',
+		type: 'titleOnly',
+		hasSlideNumber: 'titleOnly',
+		objects: [].concat(_footerBar),
+		placeholders: [
+			{
+				type: 'title',
+				text: 'Click to add title',
 				name: 'title',
 				options: {
 					x: '3%',
@@ -197,20 +351,148 @@ const MASTER_FILE = {
 			}
 		]
 	},
-	TITLE_AND_CONTENT: {
-		title: 'Socialbakers Title and Content',
+	BLANK: {
+		title: 'Blank',
+		type: 'blank',
+		objects: [].concat(_footerBar),
+	},
+	CONTENT_WITH_CAPTION: {
+		title: 'Content with Caption',
+		type: 'objTx',
 		objects: [].concat(_footerBar),
 		placeholders: [
 			{
-				type: 'content',
-				text: 'Content',
-				name: 'content',
+				type: 'title',
+				text: 'Click to add title',
+				name: 'title',
 				options: {
 					x: '3%',
-					y: '13%',
+					y: '3.5%',
+					w: '46%',
+					h: '7.5%'
+				}
+			}, {
+				type: 'text',
+				text: 'Click to add text',
+				name: 'text',
+				options: {
+					x: '3%',
+					y: '12%',
+					w: '46%',
+					h: '76.5%',
+					valign: 'top',
+				}
+			}, {
+				type: 'content',
+				text: 'Click to add text',
+				name: 'content',
+				options: {
+					x: '51%',
+					y: '3.5%',
+					w: '46%',
+					h: '85%',
+					valign: 'top',
+				}
+			}
+		]
+	},
+	PICTURE_WITH_CAPTION: {
+		title: 'Picture with Caption',
+		type: 'picTx',
+		objects: [].concat(_footerBar),
+		placeholders: [
+			{
+				type: 'title',
+				text: 'Click to add title',
+				name: 'title',
+				options: {
+					x: '3%',
+					y: '3.5%',
+					w: '46%',
+					h: '7.5%'
+				}
+			}, {
+				type: 'text',
+				text: 'Click to add text',
+				name: 'text',
+				options: {
+					x: '3%',
+					y: '12%',
+					w: '46%',
+					h: '76.5%',
+					valign: 'top',
+				}
+			}, {
+				type: 'image',
+				text: 'Click to add image',
+				name: 'image',
+				options: {
+					x: '51%',
+					y: '3.5%',
+					w: '46%',
+					h: '85%'
+				}
+			}
+		]
+	},
+	TITLE_AND_VERTICAL_TEXT: {
+		title: 'Title and Vertical Text',
+		type: 'vertTx',
+		objects: [].concat(_footerBar),
+		placeholders: [
+			{
+				type: 'title',
+				text: 'Click to add title',
+				name: 'title',
+				options: {
+					x: '3%',
+					y: '3.5%',
 					w: '94%',
-					h: '75%',
-					valign: 't'
+					h: '7.5%'
+				}
+			}, {
+				type: 'text',
+				text: 'Click to edit text',
+				name: 'text',
+				options: {
+					x: '29%',
+					y: '-33%',
+					w: '42%',
+					h: '167%',
+					valign: 'top',
+					rotate: '90'
+				}
+			}
+		]
+	},
+	VERTICAL_TITLE_AND_TEXT: {
+		title: 'Vertical Title and Text',
+		type: 'vertTitleAndTx',
+		objects: [].concat(_footerBar),
+		placeholders: [
+			{
+				type: 'title',
+				text: 'Click to add title',
+				name: 'title',
+				options: {
+					x: '72%',
+					y: '42%',
+					w: '47%',
+					h: '7.5%',
+					valign: 'top',
+					rotate: '90'
+				}
+			}, {
+				type: 'text',
+				text: 'Click to edit text',
+				name: 'text',
+				options: {
+					x: '24%',
+					y: '-34%',
+					w: '47%',
+					h: '160%',
+					valign: 'top',
+					rotate: '90'
 				}
 			}
 		]
