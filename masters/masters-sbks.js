@@ -142,7 +142,6 @@ const MASTER_FILE = {
 		title: 'Title Slide',
 		type: 'title',
 		hasSlideNumber: false,
-		objects: [].concat(_footerBar),
 		placeholders: [
 			{
 				type: 'title',
@@ -176,7 +175,6 @@ const MASTER_FILE = {
 	TITLE_AND_CONTENT: {
 		title: 'Title and Content',
 		type: 'obj',
-		objects: [].concat(_footerBar),
 		placeholders: [
 			{
 				type: 'title',
@@ -205,7 +203,6 @@ const MASTER_FILE = {
 	SECOND_HEADER: {
 		title: 'Section Header',
 		type: 'secHead',
-		objects: [].concat(_footerBar),
 		placeholders: [
 			{
 				type: 'title',
@@ -237,7 +234,6 @@ const MASTER_FILE = {
 	TWO_CONTENT: {
 		title: 'Two Content',
 		type: 'twoObj',
-		objects: [].concat(_footerBar),
 		placeholders: [
 			{
 				type: 'title',
@@ -277,7 +273,6 @@ const MASTER_FILE = {
 	COMPARISON: {
 		title: 'Comparison',
 		type: 'twoTxTwoObj',
-		objects: [].concat(_footerBar),
 		placeholders: [
 			{
 				type: 'title',
@@ -339,7 +334,6 @@ const MASTER_FILE = {
 	TITLE_ONLY: {
 		title: 'Title Only',
 		type: 'titleOnly',
-		objects: [].concat(_footerBar),
 		placeholders: [
 			{
 				type: 'title',
@@ -359,13 +353,11 @@ const MASTER_FILE = {
 	},
 	BLANK: {
 		title: 'Blank',
-		type: 'blank',
-		objects: [].concat(_footerBar),
+		type: 'blank'
 	},
 	CONTENT_WITH_CAPTION: {
 		title: 'Content with Caption',
 		type: 'objTx',
-		objects: [].concat(_footerBar),
 		placeholders: [
 			{
 				type: 'title',
@@ -405,7 +397,6 @@ const MASTER_FILE = {
 	PICTURE_WITH_CAPTION: {
 		title: 'Picture with Caption',
 		type: 'picTx',
-		objects: [].concat(_footerBar),
 		placeholders: [
 			{
 				type: 'title',
@@ -444,7 +435,6 @@ const MASTER_FILE = {
 	TITLE_AND_VERTICAL_TEXT: {
 		title: 'Title and Vertical Text',
 		type: 'vertTx',
-		objects: [].concat(_footerBar),
 		placeholders: [
 			{
 				type: 'title',
@@ -474,7 +464,6 @@ const MASTER_FILE = {
 	VERTICAL_TITLE_AND_TEXT: {
 		title: 'Vertical Title and Text',
 		type: 'vertTitleAndTx',
-		objects: [].concat(_footerBar),
 		placeholders: [
 			{
 				type: 'title',
