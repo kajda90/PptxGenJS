@@ -18,6 +18,8 @@ const PPTX_COLORS = {
 	ACCENT4: 'accent4',
 	ACCENT5: 'accent5',
 	ACCENT6: 'accent6',
+	HLINK: 'hlink',
+	FOLHLINK: 'folHlink'
 }
 
 const SETTINGS = {
@@ -32,15 +34,17 @@ const COLORS = {
 	FOOTER_BACKGROUND: 'f1f1f4',
 	SCHEME: {
 		dk1: '2F3744',
-		dk2: 'F3F3F5',
-		lt1: '6B7883',
+		dk2: '6B7883',
+		lt1: 'F3F3F5',
 		lt2: 'FFFFFF',
 		accent1: '1A3A82',
 		accent2: '38C0C0',
 		accent3: '3B922B',
 		accent4: 'FFCC00',
 		accent5: 'A22323',
-		accent6: '66245F'
+		accent6: '66245F',
+		hlink: '1869B7',
+		folHlink: '1869B7'
 	}
 }
 
@@ -64,7 +68,8 @@ let _footerBar = [{
 		y: FOOTER_BAR.y,
 		w: '100%',
 		h: FOOTER_BAR.h,
-		fill: COLORS.FOOTER_BACKGROUND
+		fill: PPTX_COLORS.BACKGROUND1,
+		preserve: true
 	}
 }, {
 	image: {
@@ -72,14 +77,15 @@ let _footerBar = [{
 		y: '93%',
 		w: pxToInch(FOOTER_BAR.SBKS_LOGO.w),
 		h: pxToInch(FOOTER_BAR.SBKS_LOGO.h),
-		data: IMAGES.SBKS_LOGO.data
+		data: IMAGES.SBKS_LOGO.data,
+		preserve: true
 	}
 }];
 
 const MASTER_FILE = {
 	MASTER_SLIDE: {
 		definitions: {
-			title: 'Socialbakers Slide Master',
+			title: 'Slide Master',
 			bkgd: COLORS.BACKGROUND,
 			color: COLORS.DEFAULT_COLOR,
 			margin: SETTINGS.MARGIN,
@@ -132,7 +138,7 @@ const MASTER_FILE = {
 			}
 		}
 	},
-	INTRO_SLIDE: {
+	TITLE_SLIDE: {
 		title: 'Title Slide',
 		type: 'title',
 		hasSlideNumber: false,
@@ -140,7 +146,7 @@ const MASTER_FILE = {
 		placeholders: [
 			{
 				type: 'title',
-				text: 'Dashboard Name',
+				text: 'Click to add title',
 				name: 'title',
 				options: {
 					x: '3%',
@@ -148,13 +154,12 @@ const MASTER_FILE = {
 					w: '94%',
 					h: '35%',
 					font_size: 48,
-					color: COLORS.SCHEME.dk2,
 					align: 'center',
 					valign: 'bottom'
 				}
 			}, {
 				type: 'subTitle',
-				text: 'Data Range of the Report',
+				text: 'Click to add subtitle',
 				name: 'subTitle',
 				options: {
 					x: '3%',
@@ -162,7 +167,6 @@ const MASTER_FILE = {
 					w: '94%',
 					h: '23%',
 					font_size: 20,
-					color: COLORS.SCHEME.dk2,
 					align: 'center',
 					valign: 'top'
 				}
@@ -209,9 +213,11 @@ const MASTER_FILE = {
 				name: 'title',
 				options: {
 					x: '3%',
-					y: '3.5%',
+					y: '10%',
 					w: '94%',
-					h: '7.5%'
+					h: '35%',
+					align: 'center',
+					valign: 'bottom'
 				}
 			}, {
 				type: 'text',
@@ -219,10 +225,11 @@ const MASTER_FILE = {
 				name: 'text',
 				options: {
 					x: '3%',
-					y: '12%',
+					y: '47%',
 					w: '94%',
-					h: '4%',
-					valign: 'top',
+					h: '23%',
+					align: 'center',
+					valign: 'top'
 				}
 			}
 		]
@@ -332,7 +339,6 @@ const MASTER_FILE = {
 	TITLE_ONLY: {
 		title: 'Title Only',
 		type: 'titleOnly',
-		hasSlideNumber: 'titleOnly',
 		objects: [].concat(_footerBar),
 		placeholders: [
 			{
