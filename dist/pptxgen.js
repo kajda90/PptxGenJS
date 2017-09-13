@@ -63,7 +63,7 @@ if ( NODEJS ) {
 var PptxGenJS = function(){
 	// CONSTANTS
 	var APP_VER = "1.8.0-beta";
-	var APP_REL = "20170904";
+	var APP_REL = "20170913";
 	//
 	var MASTER_OBJECTS = {
 		'chart': { name:'chart' },
@@ -378,7 +378,6 @@ var PptxGenJS = function(){
 			}
 
 			resultObject.type = 'text';
-			resultObject.options = options;
 			options.shape     = shape;
 			options.x         = ( options.x || (options.x == 0 ? 0 : 1) );
 			options.y         = ( options.y || (options.y == 0 ? 0 : 1) );
@@ -387,7 +386,7 @@ var PptxGenJS = function(){
 			options.line      = ( options.line || (shape.name == 'line' ? '333333' : null) );
 			options.line_size = ( options.line_size || (shape.name == 'line' ? 1 : null) );
 			if ( ['dash','dashDot','lgDash','lgDashDot','lgDashDotDot','solid','sysDash','sysDot'].indexOf(options.line_dash || '') < 0 ) options.line_dash = 'solid';
-
+			resultObject.options = options;
 			target.data.push(resultObject);
 			return resultObject;
 		},
@@ -416,6 +415,7 @@ var PptxGenJS = function(){
 				intPosY = (strImagePath.y || 0);
 				intWidth = (strImagePath.cx || strImagePath.w || 0);
 				intHeight = (strImagePath.cy || strImagePath.h || 0);
+				preserve = strImagePath.preserve || false;
 				sizing = strImagePath.sizing || null;
 				objHyperlink = (strImagePath.hyperlink || '');
 				strImageData = (strImagePath.data || '');
@@ -456,6 +456,7 @@ var PptxGenJS = function(){
 				y: (intPosY  || 0),
 				cx: (intWidth || imgObj.width),
 				cy: (intHeight || imgObj.height),
+				preserve: preserve,
 				sizing: sizing
 			};
 
@@ -574,6 +575,7 @@ var PptxGenJS = function(){
 			options.y = (typeof options.y !== 'undefined' && options.y != null && !isNaN(options.y) ? options.y : 1);
 			options.w = (options.w || '50%');
 			options.h = (options.h || '50%');
+			options.preserve = options.preserve || false;
 
 			// B: Options: misc
 			if ( ['bar','col'].indexOf(options.barDir || '') < 0 ) options.barDir = 'col';
@@ -676,7 +678,7 @@ var PptxGenJS = function(){
 					else if ( MASTER_OBJECTS[key] && key == 'image' ) gObjPptxGenerators.addImageDefinition(object[key], target);
 					else if ( MASTER_OBJECTS[key] && key == 'line'  ) gObjPptxGenerators.addShapeDefinition(gObjPptxShapes.LINE, object[key], target);
 					else if ( MASTER_OBJECTS[key] && key == 'rect'  ) gObjPptxGenerators.addShapeDefinition(gObjPptxShapes.RECTANGLE, object[key], target);
-					else if ( MASTER_OBJECTS[key] && key == 'text'  ) gObjPptxGenerators.addTextDefinition(object[key].text, object[key].options, target);
+					else if ( MASTER_OBJECTS[key] && key == 'text'  ) gObjPptxGenerators.addTextDefinition(object[key].text, object[key], target);
 				});
 			}
 
@@ -779,6 +781,8 @@ var PptxGenJS = function(){
 				if ( slideItemObj.options.flipV  ) locationAttr += ' flipV="1"';
 				if ( slideItemObj.options.rotate ) locationAttr += ' rot="' + convertRotationDegrees(slideItemObj.options.rotate)+ '"';
 
+				slideItemObj.options.preserve = slideItemObj.options.preserve || false;
+
 				// B: Add OBJECT to current Slide ----------------------------
 				switch ( slideItemObj.type ) {
 					case 'table':
@@ -805,7 +809,7 @@ var PptxGenJS = function(){
 								+ '  <p:nvGraphicFramePr>'
 								+ '    <p:cNvPr id="'+ (intTableNum*slideObject.numb + 1) +'" name="Table '+ (intTableNum*slideObject.numb) +'"/>'
 								+ '    <p:cNvGraphicFramePr><a:graphicFrameLocks noGrp="1"/></p:cNvGraphicFramePr>'
-								+ '    <p:nvPr><p:extLst><p:ext uri="{D42A27DB-BD31-4B8C-83A1-F6EECF244321}"><p14:modId xmlns:p14="http://schemas.microsoft.com/office/powerpoint/2010/main" val="1579011935"/></p:ext></p:extLst></p:nvPr>'
+								+ '    <p:nvPr' + (slideItemObj.options.preserve ? ' userDrawn="1"' : '') + '><p:extLst><p:ext uri="{D42A27DB-BD31-4B8C-83A1-F6EECF244321}"><p14:modId xmlns:p14="http://schemas.microsoft.com/office/powerpoint/2010/main" val="1579011935"/></p:ext></p:extLst></p:nvPr>'
 								+ '  </p:nvGraphicFramePr>'
 								+ '  <p:xfrm>'
 								+ '    <a:off  x="'+ (x  || EMU) +'"  y="'+ (y  || EMU) +'"/>'
@@ -1038,7 +1042,7 @@ var PptxGenJS = function(){
 
 						// B: The addition of the "txBox" attribute is the sole determiner of if an object is a Shape or Textbox
 						strSlideXml += '<p:nvSpPr><p:cNvPr id="'+ (idx+2) +'" name="Object '+ (idx+1) +'"/>';
-						strSlideXml += '<p:cNvSpPr' + ((slideItemObj.options && slideItemObj.options.isTextBox) ? ' txBox="1"/><p:nvPr/>' : '/><p:nvPr/>');
+						strSlideXml += '<p:cNvSpPr' + ((slideItemObj.options && slideItemObj.options.isTextBox) ? ' txBox="1"/>' : '/>') + '<p:nvPr' + (slideItemObj.options.preserve ? ' userDrawn="1"' : '') + '/>';
 						strSlideXml += '</p:nvSpPr>';
 						strSlideXml += '<p:spPr><a:xfrm' + locationAttr + '>';
 						strSlideXml += '<a:off x="'  + x  + '" y="'  + y  + '"/>';
@@ -1109,7 +1113,7 @@ var PptxGenJS = function(){
 						strSlideXml += '    <p:cNvPr id="'+ (idx + 2) +'" name="Object '+ (idx + 1) +'" descr="'+ slideItemObj.image +'">';
 						if ( slideItemObj.hyperlink ) strSlideXml += '<a:hlinkClick r:id="rId'+ slideItemObj.hyperlink.rId +'" tooltip="'+ (slideItemObj.hyperlink.tooltip ? decodeXmlEntities(slideItemObj.hyperlink.tooltip) : '') +'"/>';
 						strSlideXml += '    </p:cNvPr>';
-						strSlideXml += '    <p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr><p:nvPr/>';
+						strSlideXml += '    <p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr><p:nvPr' + (slideItemObj.options.preserve ? ' userDrawn="1"' : '') + '/>';
 						strSlideXml += '  </p:nvPicPr>';
 						strSlideXml += '<p:blipFill>';
 						strSlideXml += '  <a:blip r:embed="rId' + slideItemObj.imageRid + '" cstate="print"/>';
@@ -1144,7 +1148,7 @@ var PptxGenJS = function(){
 							// IMPORTANT: <p:cNvPr id="" value is critical - if not the same number as preiew image rId, PowerPoint throws error!
 							strSlideXml += ' <p:cNvPr id="'+ (slideItemObj.mediaRid+2) +'" name="Picture'+ (idx + 1) +'"/>';
 							strSlideXml += ' <p:cNvPicPr/>';
-							strSlideXml += ' <p:nvPr>';
+							strSlideXml += ' <p:nvPr' + (slideItemObj.options.preserve ? ' userDrawn="1"' : '') + '>';
 							strSlideXml += '  <a:videoFile r:link="rId'+ slideItemObj.mediaRid +'"/>';
 							strSlideXml += ' </p:nvPr>';
 							strSlideXml += ' </p:nvPicPr>';
@@ -1164,7 +1168,7 @@ var PptxGenJS = function(){
 							// IMPORTANT: <p:cNvPr id="" value is critical - if not the same number as preiew image rId, PowerPoint throws error!
 							strSlideXml += ' <p:cNvPr id="'+ (slideItemObj.mediaRid+2) +'" name="'+ slideItemObj.media.split('/').pop().split('.').shift() +'"><a:hlinkClick r:id="" action="ppaction://media"/></p:cNvPr>';
 							strSlideXml += ' <p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr>';
-							strSlideXml += ' <p:nvPr>';
+							strSlideXml += ' <p:nvPr' + (slideItemObj.options.preserve ? ' userDrawn="1"' : '') + '>';
 							strSlideXml += '  <a:videoFile r:link="rId'+ slideItemObj.mediaRid +'"/>';
 							strSlideXml += '  <p:extLst>';
 							strSlideXml += '   <p:ext uri="{DAA4B4D4-6D71-4841-9C94-3DE7FCFB9230}">';
@@ -1190,7 +1194,7 @@ var PptxGenJS = function(){
 						strSlideXml += ' <p:nvGraphicFramePr>';
 						strSlideXml += '   <p:cNvPr id="'+ (idx + 2) +'" name="Chart '+ (idx + 1) +'"/>';
 						strSlideXml += '   <p:cNvGraphicFramePr/>';
-						strSlideXml += '   <p:nvPr/>';
+						strSlideXml += '   <p:nvPr' + (slideItemObj.options.preserve ? ' userDrawn="1"' : '') + '/>';
 						strSlideXml += ' </p:nvGraphicFramePr>';
 						strSlideXml += ' <p:xfrm>'
 						strSlideXml += '  <a:off  x="' + x  + '"  y="' + y  + '"/>'
