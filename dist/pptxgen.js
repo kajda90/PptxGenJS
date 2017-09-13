@@ -239,7 +239,7 @@ var PptxGenJS = function(){
 	/** @type {object} specifies name and colors of a theme */
 	gObjPptx.theme = { name: 'Office', colors: {} };
 	/** @type {object[]} slide layout definition objects, used for generating slide layout files */
-	gObjPptx.layoutDefinitions = [DEF_EMPTY_LAYOUT];
+	gObjPptx.layoutDefinitions = [];
 	/** @type {Number} global counter for included images (used for index in their filenames) */
 	gObjPptx.imageCounter = 0;
 	/** @type {Number} global counter for included charts (used for index in their filenames) */
@@ -4244,7 +4244,14 @@ var PptxGenJS = function(){
 	function makeXmlLayout(slideLayoutObject) {
 		var strSlideXml = gObjPptxGenerators.slideObjectToXml(slideLayoutObject);
 		var strXml =  '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' + CRLF;
-			strXml += '<p:sldLayout xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main" preserve="1" userDrawn="1">';
+			strXml += [
+				'<p:sldLayout xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"',
+				'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"',
+				'xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"',
+				(slideLayoutObject.type ? 'type="' + slideLayoutObject.type + '"' : ''),
+				'preserve="1"',
+				'>',
+			].join(' ')
  			strXml += strSlideXml;
 			strXml += '<p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr>';
 			strXml += '</p:sldLayout>';
@@ -5029,6 +5036,7 @@ var PptxGenJS = function(){
 			data: [],
 			placeholders: [],
 			rels: [],
+			type: layoutDef.type,
 			slideNumberObj: null
 		};
 
