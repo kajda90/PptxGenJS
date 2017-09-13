@@ -2754,7 +2754,10 @@ var PptxGenJS = function(){
 					strXml += '   </a:ln>';
 					strXml += ' </c:spPr>';
 					strXml += '  <c:txPr>';
-					strXml += '    <a:bodyPr rot="0"/>';
+					strXml += '  <a:bodyPr ' + [
+						'rot="' + convertRotationDegrees(rel.opts.catAxisLabelRotate || 0) + '"',
+						rel.opts.catAxisLabelDirection ? 'vert="' + rel.opts.catAxisLabelDirection + '"' : '',
+					].join(' ') + '/>'
 					strXml += '    <a:lstStyle/>';
 					strXml += '    <a:p>';
 					strXml += '    <a:pPr>';
@@ -2814,7 +2817,7 @@ var PptxGenJS = function(){
 					strXml += '   </a:ln>';
 					strXml += ' </c:spPr>';
 					strXml += ' <c:txPr>';
-					strXml += '  <a:bodyPr rot="0"/>';
+					strXml += '    <a:bodyPr rot="0"/>';
 					strXml += '  <a:lstStyle/>';
 					strXml += '  <a:p>';
 					strXml += '    <a:pPr>';

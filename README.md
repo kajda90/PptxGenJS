@@ -368,6 +368,8 @@ slide.addChart({TYPE}, {DATA}, {OPTIONS});
 | `catAxisLabelFontSize` | number  | points  | `18`         | category-axis font size      | 1-256. Ex: `{ titleFontSize:12 }`          |
 | `catAxisLabelFrequency`| number  |         |               | category-axis label frequency | 1-n. Ex: `{ catAxisLabelFrequency: 2 }`          |
 | `catAxisLineShow`      | boolean |         | true         | show/hide category-axis line | `true` or `false` |
+| `catAxisLabelRotate`   | number  | degrees | `0`          | category-axis label rotation | number between 0-360 |
+| `catAxisLabelDirection` | string |         |              | category-axis label orientation | `horz` for letters rotated by 270 degrees, or `eaVert` |
 | `catAxisOrientation`   | string  |         | `minMax`     | category-axis orientation    | `maxMin` (high->low) or `minMax` (low->high) |
 | `catAxisTitle`         | string  |         | `Axis Title` | axis title                   | a string. Ex: `{ catAxisTitle:'Regions' }` |
 | `catAxisTitleColor`    | string  |         | `000000`     | title color                  | hex color code. Ex: `{ catAxisTitleColor:'0088CC' }` |
