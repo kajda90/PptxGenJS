@@ -3886,6 +3886,26 @@ var PptxGenJS = function(){
 								var cellColspan = (cellOpts.colspan)    ? ' gridSpan="'+ cellOpts.colspan +'"' : '';
 								var cellRowspan = (cellOpts.rowspan)    ? ' rowSpan="'+ cellOpts.rowspan +'"' : '';
 								var cellFill    = ((cell.optImp && cell.optImp.fill)  || cellOpts.fill ) ? ' <a:solidFill>'+ createColorElement((cell.optImp && cell.optImp.fill) || cellOpts.fill.replace('#','')) +'</a:solidFill>' : '';
+								var optFill     = (cell.optImp && cell.optImp.fill)  || cellOpts.fill;
+								var imgFill     = cellOpts.imgFill;
+								if (imgFill) {
+									var imgDef = gObjPptxGenerators.addImageDefinition({data: imgFill.data}, inSlide);
+									var offsets = ['l', 'r', 't', 'b'].reduce(function(acc, key) {
+										if (imgFill[key]) {
+											acc.push(key + '="' + imgFill[key] + '"');
+										}
+										return acc;
+									}, [])
+									cellFill = [
+										' <a:blipFill dpi="0" rotWithShape="1">',
+										'   <a:blip r:embed="rId', imgDef.imageRid, '"/>',
+										'   <a:srcRect/>',
+										'   <a:stretch>',
+										'     <a:fillRect ', offsets.join(' '), '/>',
+										'   </a:stretch>',
+										' </a:blipFill>',
+									].join('');
+								}
 								var cellMargin  = ( cellOpts.margin == 0 || cellOpts.margin ? cellOpts.margin : (cellOpts.marginPt || DEF_CELL_MARGIN_PT) );
 								if ( !Array.isArray(cellMargin) && typeof cellMargin === 'number' ) cellMargin = [cellMargin,cellMargin,cellMargin,cellMargin];
 								cellMargin = ' marL="'+ cellMargin[3]*ONEPT +'" marR="'+ cellMargin[1]*ONEPT +'" marT="'+ cellMargin[0]*ONEPT +'" marB="'+ cellMargin[2]*ONEPT +'"';
@@ -5201,6 +5221,14 @@ var PptxGenJS = function(){
 			if ( opts.addTable ) newSlide.addTable( opts.addTable.rows,  (opts.addTable.opts || {}) );
 			if ( opts.addText  ) newSlide.addText(  opts.addText.text,   (opts.addText.opts  || {}) );
 				});
+	}
+
+	/**
+	 * Returns alredy generated slides.
+	 * It can be used for additional customization before export the Presentation to an .pptx file.
+	 */
+	this.getSLides = function getSLides() {
+		return gObjPptx.slides;
 	}
 };
 

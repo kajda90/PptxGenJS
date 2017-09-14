@@ -676,6 +676,12 @@ tables. Use this option to ensure there is no wasted space and to guarantee a pr
 Bullets and word-level formatting are supported inside table cells. Passing an array of objects with text/options values
 as the `text` value allows fine-grained control over the text inside cells.
 * Available formatting options are here: [Text Options](#text-options)
+* An image can be used as a background for a table cell:
+
+  | Option       | Type    | Unit    | Default   | Description        | Possible Values  |
+  | :----------- | :------ | :------ | :-------- | :----------------- | :--------------- |
+  | `imgFill`    | object  |% * 1000 | t/b/l/r = 0          | fill/bkgd image    | object with `data` (base64), `t`, `b`, `l`, `r` (offsets of the image inside the cell - in % * 1000), values. Ex: `{data: 'data:image/png;base64,...', l:17000}`  (left offset 17%)|
+
 * See below for examples or view the `examples/pptxgenjs-demo.html` page for lots more
 
 ### Table Cell Formatting Examples
