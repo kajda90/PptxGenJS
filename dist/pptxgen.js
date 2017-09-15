@@ -2636,7 +2636,7 @@ var PptxGenJS = function(){
 
 					// Color bar chart bars various colors
 					// Allow users with a single data set to pass their own array of colors (check for this using != ours)
-					if (( rel.data.length === 1 || rel.opts.valueBarColors ) && rel.opts.chartColors != BARCHART_COLORS ) {
+					if (( rel.data.length === 1 || rel.opts.valueBarColors ) && rel.opts.chartColors != BARCHART_COLORS && rel.opts.type !== 'line') {
 						// Series Data Point colors
 						obj.values.forEach(function (value, index) {
 							var invert = rel.opts.invertedColors ? 0 : 1;
