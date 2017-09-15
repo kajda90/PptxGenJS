@@ -622,6 +622,7 @@ var PptxGenJS = function(){
 			options.dataBorder = ( options.dataBorder && typeof options.dataBorder === 'object' ? options.dataBorder : null );
 			if ( options.dataBorder && (!options.dataBorder.pt || isNaN(options.dataBorder.pt)) ) options.dataBorder.pt = 0.75;
 			if ( options.dataBorder && (!options.dataBorder.color || typeof options.dataBorder.color !== 'string' || options.dataBorder.color.length != 6) ) options.dataBorder.color = 'F9F9F9';
+			if ( options.dataBorder && (!options.dataBorder.opacity || isNaN(options.dataBorder.pt)) ) options.dataBorder.opacity = 100;
 			//
 			options.dataLabelFormatCode = ( options.dataLabelFormatCode && typeof options.dataLabelFormatCode === 'string' ? options.dataLabelFormatCode : (options.type == 'pie' || options.type == 'doughnut' ? '0%' : '#,##0') );
 			//
@@ -2603,18 +2604,19 @@ var PptxGenJS = function(){
 					strXml += '  <c:spPr>';
 
 					if ( rel.opts.chartColorsOpacity ) {
-						strXml += '    <a:solidFill>'+ createColorElement(strSerColor, '<a:alpha val="50000"/>') +'</a:solidFill>';
+						strXml += '    <a:solidFill>'+ createColorElement(strSerColor, '<a:alpha val="' + (rel.opts.chartColorsOpacity * 1000) + '"/>') +'</a:solidFill>';
 					}
 					else {
 						strXml += '    <a:solidFill>'+ createColorElement(strSerColor) +'</a:solidFill>';
 					}
 
-					if ( rel.opts.type == 'line' ) {
+					if ( rel.opts.type == 'line') {
 						strXml += '<a:ln w="'+ (rel.opts.lineSize * ONEPT) +'" cap="flat"><a:solidFill>' + createColorElement(strSerColor) +'</a:solidFill>';
 						strXml += '<a:prstDash val="' + (rel.opts.line_dash || "solid") + '"/><a:round/></a:ln>';
 					}
 					else if ( rel.opts.dataBorder ) {
-						strXml += '<a:ln w="'+ (rel.opts.dataBorder.pt * ONEPT) +'" cap="flat"><a:solidFill>'+ createColorElement(rel.opts.dataBorder.color) +'</a:solidFill><a:prstDash val="solid"/><a:round/></a:ln>';
+						var color = rel.opts.type === 'area' ? strSerColor : rel.opts.dataBorder.color;
+						strXml += '<a:ln w="'+ (rel.opts.dataBorder.pt * ONEPT) +'" cap="flat"><a:solidFill>'+ createColorElement(color, '<a:alpha val="' + (rel.opts.dataBorder.opacity * 1000) + '"/>') +'</a:solidFill><a:prstDash val="solid"/><a:round/></a:ln>';
 					}
 					strXml += createShadowElement(rel.opts.lineShadow || 'none', DEF_LINE_SHADOW);
 					strXml += '  </c:spPr>';
