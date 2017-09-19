@@ -186,19 +186,22 @@ var PptxGenJS = function(){
 			objectName: 'Media Placeholder',
 			objectType: 'media'
 		},
-		sldNum: {
-			type: 'sldNum',
+		slideNumber: {
+			type: 'slideNumber',
 			objectName: 'Slide Number Placeholder',
 			objectType: 'sldNum'
+		},
+		date: {
+			type: 'date',
+			objectName: 'Date Placeholder',
+			objectType: 'dt'
 		}
 	};
 
 	const PLACEHOLDERS_TO_INHERIT_FROM_MASTER_SLIDE = [
-		PLACEHOLDERS['title'].type,
-		PLACEHOLDERS['ctrTitle'].type,
-		PLACEHOLDERS['subTitle'].type,
 		PLACEHOLDERS['footer'].type,
-		PLACEHOLDERS['sldNum'].type,
+		PLACEHOLDERS['slideNumber'].type,
+		PLACEHOLDERS['date'].type,
 	];
 
 	const PLACEHOLDERS_WITH_BODY_PROPERTIES = [
@@ -208,8 +211,31 @@ var PptxGenJS = function(){
 		PLACEHOLDERS['text'].type,
 		PLACEHOLDERS['content'].type,
 		PLACEHOLDERS['footer'].type,
-		PLACEHOLDERS['sldNum'].type,
+		PLACEHOLDERS['slideNumber'].type,
+		PLACEHOLDERS['date'].type,
 	];
+
+	const UNIQUE_PLACEHOLDERS = [
+		PLACEHOLDERS['title'].type,
+		PLACEHOLDERS['ctrTitle'].type,
+		PLACEHOLDERS['subTitle'].type,
+		PLACEHOLDERS['footer'].type,
+		PLACEHOLDERS['slideNumber'].type,
+		PLACEHOLDERS['date'].type,
+	]
+
+	const PLACEHOLDERS_WITHOUT_IDX = [
+		PLACEHOLDERS['title'].type,
+		PLACEHOLDERS['ctrTitle'].type,
+	]
+
+	const ALLOWED_PLACEHOLDERS_IN_MASTER_SLIDE = [
+		PLACEHOLDERS['title'].type,
+		PLACEHOLDERS['text'].type,
+		PLACEHOLDERS['footer'].type,
+		PLACEHOLDERS['slideNumber'].type,
+		PLACEHOLDERS['date'].type,
+	]
 	// New End
 
 	// A: Create internal pptx object
@@ -694,11 +720,23 @@ var PptxGenJS = function(){
 			if (slideDef.placeholders && Array.isArray(slideDef.placeholders) && slideDef.placeholders.length > 0) {
 				slideDef.placeholders.forEach(function(object, idx) {
 					if (object.type && PLACEHOLDERS[object.type]) {
-						gObjPptxGenerators.addPlaceholderDefinition(idx, object, target);
+						if (target.isMaster && ALLOWED_PLACEHOLDERS_IN_MASTER_SLIDE.indexOf(object.type) == -1) {
+							throw Error('Placeholder type "' + object.type + '" is not allowed to use in a master slide');
+						}
+
+						if (object.type == PLACEHOLDERS['title'].type || object.type == PLACEHOLDERS['ctrTitle'].type) {
+							if (usedPlaceholderTypes.indexOf(PLACEHOLDERS['title'].type) != -1 || usedPlaceholderTypes.indexOf(PLACEHOLDERS['ctrTitle'].type) != -1) {
+								throw Error('Placeholder type "' + PLACEHOLDERS['title'].type + '" or "' + PLACEHOLDERS['ctrTitle'].type + '" is already defined');
+							}
+						}
 
 						if (usedPlaceholderTypes.indexOf(object.type) == -1) {
 							usedPlaceholderTypes.push(object.type);
+						} else if (UNIQUE_PLACEHOLDERS.indexOf(object.type) != -1) {
+							throw Error('Placeholder type "' + object.type + '" can be defined only once');
 						}
+
+						gObjPptxGenerators.addPlaceholderDefinition(idx, object, target);
 					}
 				});
 			}
@@ -1273,22 +1311,19 @@ var PptxGenJS = function(){
 					strSlideXml += '  <p:cNvPr id="' + placeholderObj.id + '" name="' + placeholderObj.objectName + ' ' + placeholderObj.idx + '"/>';
 					strSlideXml += '    <p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr>';
 					strSlideXml += '   <p:nvPr>';
-					strSlideXml += '   <p:ph' + (placeholderObj.type != PLACEHOLDERS['title'].type ? ' idx="' + placeholderObj.idx + '"' : '') + (placeholderObj.objectType != null ? ' type="' + placeholderObj.objectType + '"' : '') + '/>';
+					strSlideXml += '   <p:ph' + (PLACEHOLDERS_WITHOUT_IDX.indexOf(placeholderObj.type) == -1 ? ' idx="' + placeholderObj.idx + '"' : '') + (placeholderObj.objectType != null ? ' type="' + placeholderObj.objectType + '"' : '') + '/>';
 					strSlideXml += '  </p:nvPr>';
 					strSlideXml += ' </p:nvSpPr>';
 
 				if (placeholderObj.inheritedFromMaster) {
 					strSlideXml += '<p:spPr/>';
 				} else {
-					strSlideXml += ' <p:spPr><a:xfrm' + locationAttr + '>';
-					strSlideXml += '  <a:off x="' + x + '" y="' + y + '"/>';
-					strSlideXml += '  <a:ext cx="' + cx + '" cy="' + cy + '"/></a:xfrm>';
+					strSlideXml += ' <p:spPr>';
+					strSlideXml += getXmlTransform(placeholderObj, locationAttr, x, y, cx, cy);
 
-					if (placeholderObj.type == PLACEHOLDERS['footer'].type || placeholderObj.type == PLACEHOLDERS['sldNum'].type) {
-						strSlideXml += '<a:prstGeom prst="rect">';
-						strSlideXml += '  <a:avLst/>';
-						strSlideXml += '</a:prstGeom>';
-					}
+					strSlideXml += ' <a:prstGeom prst="rect">';
+					strSlideXml += '   <a:avLst/>';
+					strSlideXml += ' </a:prstGeom>';
 
 					strSlideXml += ' </p:spPr>';
 				}
@@ -1298,20 +1333,20 @@ var PptxGenJS = function(){
 				if (!placeholderObj.inheritedFromMaster && PLACEHOLDERS_WITH_BODY_PROPERTIES.indexOf(placeholderObj.type) != -1) {
 					// NOTE: Only the first level of list style is generated
 					strSlideXml += '    <a:bodyPr' + getXmlAlign('anchor', placeholderObj.options.valign) + '/>';
-						strSlideXml += '    <a:lstStyle>';
-						strSlideXml += '      <a:lvl1pPr' + getXmlAlign('algn', placeholderObj.options.align) + '>';
-						strSlideXml += '        ' + gObjPptxGenerators.textRunPropsToXml('a:defRPr', placeholderObj.options).replace(' lang="en-US"', '');
-						strSlideXml += '      </a:lvl1pPr>';
-						strSlideXml += '    </a:lstStyle>';
-					} else {
-						strSlideXml += '    <a:bodyPr/>';
-						strSlideXml += '    <a:lstStyle/>';
-					}
+					strSlideXml += '    <a:lstStyle>';
+					strSlideXml += '      <a:lvl1pPr' + getXmlAlign('algn', placeholderObj.options.align) + '>';
+					strSlideXml += '        ' + gObjPptxGenerators.textRunPropsToXml('a:defRPr', placeholderObj.options).replace(' lang="en-US"', '');
+					strSlideXml += '      </a:lvl1pPr>';
+					strSlideXml += '    </a:lstStyle>';
+				} else {
+					strSlideXml += '    <a:bodyPr/>';
+					strSlideXml += '    <a:lstStyle/>';
+				}
 
-					strSlideXml += '    <a:p>';
+				strSlideXml += '    <a:p>';
 
 				if (placeholderObj.type != PLACEHOLDERS['footer'].type) {
-					if (placeholderObj.type == PLACEHOLDERS['sldNum'].type) {
+					if (placeholderObj.type == PLACEHOLDERS['slideNumber'].type) {
 						strSlideXml += '      <a:fld id="' + SLDNUMFLDID + '" type="slidenum">';
 						strSlideXml += '        <a:rPr lang="en-US" smtClean="0"/>';
 						strSlideXml += '        <a:t>‹#›</a:t>';
@@ -2461,7 +2496,11 @@ var PptxGenJS = function(){
 			if (gObjPptx.layoutDefinitions[layoutIdx] && Array.isArray(gObjPptx.layoutDefinitions[layoutIdx].placeholders)) {
 				placeholder = gObjPptx.layoutDefinitions[layoutIdx].placeholders.find(function(placeholder) {
 					return placeholder.name && placeholder.name == placeholderName;
-				}) || placeholder;
+				});
+
+				if (placeholder == null) {
+					throw Error('Placeholder "' + placeholderName + '" is not defined for layout "' + layout.name + '"');
+				}
 			} else {
 				throw Error('Any placeholders are not defined for layout "' + layout.name + '"');
 			}
@@ -3416,21 +3455,26 @@ var PptxGenJS = function(){
 	// NOTE: Chart and table don't inherit properties automatically from theirs placeholder
 	// NOTE: If exist properties from placeholder, function will return empty string
 	// otherwise default properties. Chart and table always need some properties (due to note #1).
-	function getXmlTransform(slideObj, locationAttr, x, y, cx, cy, placeholder) {
+	function getXmlTransform(slideObj, locationAttr, x, y, cx, cy, placeholder = null) {
 		var strXml = '',
 			locAttr = '',
-			x = placeholder.options.hasOwnProperty('x') ? getSmartParseNumber(placeholder.options.x, 'X') : x,
-			y = placeholder.options.hasOwnProperty('y') ? getSmartParseNumber(placeholder.options.y, 'Y') : y,
-			cx = placeholder.options.hasOwnProperty('w') ? getSmartParseNumber(placeholder.options.w, 'X') : cx,
-			cy = placeholder.options.hasOwnProperty('h') ? getSmartParseNumber(placeholder.options.h, 'Y') : cy;
+			x = placeholder != null && placeholder.options.hasOwnProperty('x') ? getSmartParseNumber(placeholder.options.x, 'X') : x,
+			y = placeholder != null && placeholder.options.hasOwnProperty('y') ? getSmartParseNumber(placeholder.options.y, 'Y') : y,
+			cx = placeholder != null && placeholder.options.hasOwnProperty('w') ? getSmartParseNumber(placeholder.options.w, 'X') : cx,
+			cy = placeholder != null && placeholder.options.hasOwnProperty('h') ? getSmartParseNumber(placeholder.options.h, 'Y') : cy;
 
-		if (placeholder.options.hasOwnProperty('flipH')) locAttr += ' flipH="1"';
-		if (placeholder.options.hasOwnProperty('flipV')) locAttr += ' flipV="1"';
-		if (placeholder.options.hasOwnProperty('rotate')) locAttr += ' rot="' + convertRotationDegrees(placeholder.options.rotate) + '"';
+		if (placeholder != null && placeholder.options.hasOwnProperty('flipH')) locAttr += ' flipH="1"';
+		if (placeholder != null && placeholder.options.hasOwnProperty('flipV')) locAttr += ' flipV="1"';
+		if (placeholder != null && placeholder.options.hasOwnProperty('rotate')) locAttr += ' rot="' + convertRotationDegrees(placeholder.options.rotate) + '"';
 
 		locAttr = locAttr.length ? locAttr : locationAttr;
 
-		if (slideObj.type == PLACEHOLDERS['chart'].type) {
+		if (placeholder == null) {
+            strXml += '<a:xfrm' + locationAttr + '>';
+            strXml += ' <a:off x="' + x + '" y="' + y + '"/>';
+            strXml += ' <a:ext cx="' + cx + '" cy="' + cy + '"/>';
+            strXml += '</a:xfrm>';
+		} else if (slideObj.type == PLACEHOLDERS['chart'].type) {
 			strXml += '<p:xfrm>';
 			strXml += '<a:off x="' + x + '" y="' + y + '"/>';
 			strXml += '<a:ext cx="' + cx + '" cy="' + cy + '"/>';
@@ -3440,15 +3484,6 @@ var PptxGenJS = function(){
 			strXml += ' <a:off  x="' + (x || EMU) + '"  y="' + (y || EMU) + '"/>';
 			strXml += ' <a:ext cx="' + (cx || EMU) + '" cy="' + (cy || EMU) + '"/>';
 			strXml += '</p:xfrm>';
-		} else if (!(placeholder.options.hasOwnProperty('x') || placeholder.options.hasOwnProperty('y') || placeholder.options.hasOwnProperty('w') || placeholder.options.hasOwnProperty('h'))) {
-            if (placeholder.type !== 'sldNum') {
-                strXml += '<a:xfrm' + locationAttr + '>';
-                strXml += ' <a:off x="' + x + '" y="' + y + '"/>';
-                strXml += ' <a:ext cx="' + cx + '" cy="' + cy + '"/>';
-                strXml += '</a:xfrm>';
-            }
-		} else if (slideObj.type == PLACEHOLDERS['footer'].type) {
-			strXml = '<p:xfrm/>';
 		} else {
 			strXml = '<p:xfrm/>';
 		}
@@ -4012,7 +4047,7 @@ var PptxGenJS = function(){
 					if (placeholder) {
 						// NEW Start
 						strSlideXml += '<p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr>';
-						strSlideXml += '<p:nvPr><p:ph' + (placeholder.type != PLACEHOLDERS['title'].type ? ' idx="' + placeholder.idx + '"' : '') + (placeholder.objectType != null ? ' type="' + placeholder.objectType + '"' : '') + '/></p:nvPr>';
+						strSlideXml += '<p:nvPr><p:ph' + (PLACEHOLDERS_WITHOUT_IDX.indexOf(placeholder.type) == -1 ? ' idx="' + placeholder.idx + '"' : '') + (placeholder.objectType != null ? ' type="' + placeholder.objectType + '"' : '') + '/></p:nvPr>';
 						strSlideXml += '</p:nvSpPr>';
 						strSlideXml += '<p:spPr>';
 
@@ -4368,7 +4403,7 @@ var PptxGenJS = function(){
 
 		if (layoutDef.placeholders) {
 			placeholder = layoutDef.placeholders.find(function(item) {return item.type === placeholderType});
-			name = placeholder && placeholder.name
+			name = placeholder && placeholder.name;
 		}
 
 		return name;
