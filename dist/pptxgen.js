@@ -2074,9 +2074,7 @@ var PptxGenJS = function(){
 				if ( typeof text.options.hyperlink !== 'object' ) console.log("ERROR: text `hyperlink` option should be an object. Ex: `hyperlink: {url:'https://github.com'}` ");
 				else if ( !text.options.hyperlink.url || typeof text.options.hyperlink.url !== 'string' ) console.log("ERROR: 'hyperlink.url is required and/or should be a string'");
 				else {
-					var intRels = 1;
-					gObjPptx.slides.forEach(function(slide,idx){ intRels += slide.rels.length; });
-					var intRelId = intRels+1;
+					var intRelId = slideRels.length + 1;
 
 					slideRels.push({
 						type: 'hyperlink',
@@ -2089,6 +2087,8 @@ var PptxGenJS = function(){
 				}
 			}
 		});
+		console.log(slideRels)
+		console.log("\n\n")
 	}
 
 	/**
