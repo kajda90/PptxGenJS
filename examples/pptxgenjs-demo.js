@@ -85,6 +85,7 @@ function execGenSlidesFuncs(type) {
 	pptx.setRevision('15');
 	pptx.setSubject('PptxGenJS Test Suite Export');
 	pptx.setTitle('PptxGenJS Test Suite Presentation');
+	pptx.addLayoutSlide({title: '[ default ]'});
 
 	// STEP 2: Run requested test
 	var arrTypes = ( typeof type === 'string' ? [type] : type );
@@ -444,7 +445,7 @@ function genSlides_Table(pptx) {
 		slide.addText( [{text:'Table Examples: ', options:textTitle},{text:'Test: `{ newPageStartY: 1.5 }`', options:textSubtt}], {x:0.5, y:0.13, w:'90%'} );
 		slide.addTable( arrRows, { x:3.0, y:4.0, newPageStartY:1.5, colW:[0.75,1.75, 7], margin:5, border:'CFCFCF' } );
 
-		var slide = pptx.addNewSlide( pptx.masters.MASTER_SLIDE, {bkgd:'CCFFCC'} );
+		var slide = pptx.addNewSlide('Corporate Branded Slide', {bkgd:'CCFFCC'} );
 		slide.addText( [{text:'Table Examples: ', options:textTitle},{text:'Master Page with Auto-Paging', options:textSubtt}], {x:0.5, y:0.13, w:'90%'} );
 		slide.addTable( arrRows, { x:1.0, y:0.6, colW:[0.75,1.75, 7], margin:5, border:'CFCFCF' } );
 
@@ -1572,13 +1573,13 @@ function genSlides_Text(pptx) {
 }
 
 function genSlides_Master(pptx) {
-	var slide1 = pptx.addNewSlide( pptx.masters.TITLE_SLIDE  );
-	var slide2 = pptx.addNewSlide( pptx.masters.MASTER_SLIDE );
-	var slide3 = pptx.addNewSlide( pptx.masters.THANKS_SLIDE );
+	var slide1 = pptx.addNewSlide( pptx.masters.TITLE_SLIDE.title  );
+	var slide2 = pptx.addNewSlide( pptx.masters.MASTER_SLIDE.title );
+	var slide3 = pptx.addNewSlide( pptx.masters.THANKS_SLIDE.title );
 
-	var slide4 = pptx.addNewSlide( pptx.masters.TITLE_SLIDE,  { bkgd:'0088CC', slideNumber:{x:'50%', y:'90%', color:'0088CC'} } );
-	var slide5 = pptx.addNewSlide( pptx.masters.MASTER_SLIDE, { bkgd:{ path:'images/title_bkgd_alt.jpg' } } );
-	var slide6 = pptx.addNewSlide( pptx.masters.THANKS_SLIDE, { bkgd:'ffab33'} );
+	var slide4 = pptx.addNewSlide( pptx.masters.TITLE_SLIDE.title,  { bkgd:'0088CC', slideNumber:{x:'50%', y:'90%', color:'0088CC'} } );
+	var slide5 = pptx.addNewSlide( pptx.masters.MASTER_SLIDE.title, { bkgd:{ path:'images/title_bkgd_alt.jpg' } } );
+	var slide6 = pptx.addNewSlide( pptx.masters.THANKS_SLIDE.title, { bkgd:'ffab33'} );
 
 	//var slide7 = pptx.addNewSlide( pptx.masters.LEGACY_TEST_ONLY );
 }

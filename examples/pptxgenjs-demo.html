@@ -275,6 +275,8 @@
 			$('#demo-basic').html('<pre class="prettyprint">\n'
 				+ '// STEP 1: Create a new Presentation\n'
 				+ 'var pptx = new PptxGenJS();\n'
+				+ 'pptx.addLayoutSlide({title: "[ default ]"});'
+				+ '\n'
 				+ '\n'
 				+ '// STEP 2: Add a new Slide to the Presentation\n'
 				+ 'var slide = pptx.addNewSlide();\n'
@@ -291,6 +293,8 @@
 
 			$('#demo-youtube').html('<pre class="prettyprint">\n'
 				+ "var pptx = new PptxGenJS();\n"
+				+ 'pptx.addLayoutSlide({title: "[ default ]"});'
+				+ '\n'
 				+ "var slide = pptx.addNewSlide();\n"
 				+ '\n'
 				+ "// Provide the usual options (locations and size), then pass the embed code from YouTube (it's on every video page)\n"
@@ -302,6 +306,8 @@
 
 			$('#demo-sandbox').html('<pre class="prettyprint" style="margin:0 !important; width:auto; padding:10px; border-radius:0;">\n'
 				+ "var pptx = new PptxGenJS();\n"
+				+ 'pptx.addLayoutSlide({title: "[ default ]"});'
+				+ '\n'
 				+ "pptx.setLayout('LAYOUT_WIDE');\n"
 				+ "var slide = pptx.addNewSlide();\n"
 				+ "\n"
