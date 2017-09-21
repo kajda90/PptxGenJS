@@ -523,7 +523,7 @@ slide.addText([ {text:'TEXT', options:{OPTIONS}} ]);
 | `type`       | string  |         | outer     | shadow type         | `outer` or `inner`                       |
 | `angle`      | number  | degrees |           | shadow angle        | 0-359. Ex: `{ angle:180 }`               |
 | `blur`       | number  | points  |           | blur size           | 1-256. Ex: `{ blur:3 }`                  |
-| `color`      | string  |         |           | text color          | hex color code, [scheme color constant](#scheme-colors) or [gradient](#gradients). Ex: `{ color:'0088CC' }` |
+| `color`      | string  |         |           | text color          | hex color code, [scheme color constant](#scheme-colors). Ex: `{ color:'0088CC' }` |
 | `offset`     | number  | points  |           | offset size         | 1-256. Ex: `{ offset:8 }`                |
 | `opacity`    | number  | percent |           | opacity             | 0-1. Ex: `opacity:0.75`                  |
 

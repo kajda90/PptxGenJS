@@ -1537,9 +1537,9 @@ var PptxGenJS = function(){
 		 * @param {string} color hexa representation (eg. "FFFF00") or a scheme color constant (eg. colors.ACCENT1)
 		 * @param {string} innerElements Additional elements that adjust the color and are enclosed by the color element.
 		 */
-		colorToXml: function(colorOpts, innerElements) {
+		colorToXml: function(colorOpts, innerElements, stripEnclosingTag) {
 			if (typeof(colorOpts) === "string") {
-				return gObjPptxGenerators.solidFillToXml(colorOpts, innerElements);
+				return gObjPptxGenerators.solidFillToXml(colorOpts, innerElements, stripEnclosingTag);
 			}
 			else if (colorOpts.gradient) {
 				return gObjPptxGenerators.gradientFillToXml(colorOpts, innerElements);
@@ -2382,10 +2382,10 @@ var PptxGenJS = function(){
 		strXml += '<a:'+ type +'Shdw sx="100000" sy="100000" kx="0" ky="0" ';
 		strXml += ' algn="bl" rotWithShape="'+ (+rotateWithShape) +'" blurRad="'+ blur +'" ';
 		strXml += ' dist="'+ offset +'" dir="'+ angle +'">';
-		strXml += gObjPptxGenerators.colorToXml(color, '<a:alpha val="'+ opacity +'"/>');
+		strXml += gObjPptxGenerators.colorToXml(color, '<a:alpha val="'+ opacity +'"/>', true);
 		strXml += '</a:'+ type +'Shdw>';
 		strXml += '</a:effectLst>';
-
+		console.log(strXml)
 		return strXml;
 	}
 
