@@ -2822,7 +2822,11 @@ var PptxGenJS = function(){
 					strXml += ' </c:spPr>';
 					strXml += '  <c:txPr>';
 					strXml += '  <a:bodyPr ' + [
-						'rot="' + convertRotationDegrees(rel.opts.catAxisLabelRotate || 0) + '"',
+						// angle has to be in range (-180;180) to get valid text clipping
+						'rot="' + (function(a) {
+							if (!a) return 0
+							return convertRotationDegrees(a < 180 ? a : -360 + a)
+						})(rel.opts.catAxisLabelRotate) + '"',
 						rel.opts.catAxisLabelDirection ? 'vert="' + rel.opts.catAxisLabelDirection + '"' : '',
 					].join(' ') + '/>'
 					strXml += '    <a:lstStyle/>';
