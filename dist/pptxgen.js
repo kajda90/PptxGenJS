@@ -2087,8 +2087,6 @@ var PptxGenJS = function(){
 				}
 			}
 		});
-		console.log(slideRels)
-		console.log("\n\n")
 	}
 
 	/**
