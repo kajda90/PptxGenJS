@@ -3450,9 +3450,9 @@ var PptxGenJS = function(){
 		var internalElements = '';
 		var outText = '';
 
-		if ( back_info && typeof back_info === 'string' ) {
+		if ( back_info && (typeof back_info === 'string' || back_info.gradient !== undefined)) {
 			outText += '<p:bg><p:bgPr>';
-			outText += genXmlColorSelection( back_info.replace('#',''), false );
+			outText += genXmlColorSelection( back_info, false );
 			outText += '<a:effectLst/>';
 			outText += '</p:bgPr></p:bg>';
 		}
@@ -3474,7 +3474,6 @@ var PptxGenJS = function(){
 					break;
 			}
 		}
-		console.log(colorVal, fillType)
 		return outText;
 	}
 

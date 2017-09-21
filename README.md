@@ -90,6 +90,7 @@ Quickly and easily create PowerPoint presentations with a few simple JavaScript 
   - [Creative Solutions](#creative-solutions)
 - [Full PowerPoint Shape Library](#full-powerpoint-shape-library)
 - [Scheme Colors](#scheme-colors)
+- [Gradients](#gradients)
 - [Performance Considerations](#performance-considerations)
   - [Pre-Encode Large Images](#pre-encode-large-images)
 - [Building with Webpack/Typescript](#building-with-webpacktypescript)
@@ -224,8 +225,8 @@ slide.color = '696969';
 ### Slide Formatting Options
 | Option       | Type    | Unit   | Default   | Description         | Possible Values  |
 | :----------- | :------ | :----- | :-------- | :------------------ | :--------------- |
-| `bkgd`       | string  |        | `FFFFFF`  | background color    | hex color code or [scheme color constant](#scheme-colors). |
-| `color`      | string  |        | `000000`  | default text color  | hex color code or [scheme color constant](#scheme-colors). |
+| `bkgd`       | string  |        | `FFFFFF`  | background color    | hex color code, [scheme color constant](#scheme-colors) or [gradient](#gradients). |
+| `color`      | string  |        | `000000`  | default text color  | hex color code, [scheme color constant](#scheme-colors) or [gradient](#gradients). |
 
 ### Applying Master Slides / Branding
 ```javascript
@@ -248,7 +249,7 @@ slide.slideNumber({ x:1.0, y:'90%', fontFace:'Courier', fontSize:32, color:'CF01
 | :----------- | :------ | :----- | :-------- | :------------------ | :--------------- |
 | `x`          | number  | inches | `0.3`     | horizontal location | 0-n OR 'n%'. (Ex: `{x:'10%'}` places number 10% from left edge) |
 | `y`          | number  | inches | `90%`     | vertical location   | 0-n OR 'n%'. (Ex: `{y:'90%'}` places number 90% down the Slide) |
-| `color`      | string  |        |           | text color          | hex color code or [scheme color constant](#scheme-colors). Ex: `{color:'0088CC'}` |
+| `color`      | string  |        |           | text color          | hex color code, [scheme color constant](#scheme-colors) or [gradient](#gradients). Ex: `{color:'0088CC'}` |
 | `fontFace`   | string  |        |           | font face           | any available font. Ex: `{fontFace:Arial}` |
 | `fontSize`   | number  | points |           | font size           | 8-256. Ex: `{fontSize:12}` |
 
@@ -497,8 +498,8 @@ slide.addText([ {text:'TEXT', options:{OPTIONS}} ]);
 | `breakLine`  | boolean |         | `false`   | appends a line break | `true` or `false` (only applies when used in text object options) Ex: `{text:'hi', options:{breakLine:true}}` |
 | `bullet`     | boolean |         | `false`   | bulleted text       | `true` or `false` |
 | `bullet`     | object  |         |           | bullet options (number type or choose any unicode char) | object with `type` or `code`. Ex: `bullet:{type:'number'}`. Ex: `bullet:{code:'2605'}` |
-| `color`      | string  |         |           | text color          | hex color code or [scheme color constant](#scheme-colors). Ex: `{ color:'0088CC' }` |
-| `fill`       | string  |         |           | fill/bkgd color     | hex color code or [scheme color constant](#scheme-colors). Ex: `{ color:'0088CC' }` |
+| `color`      | string  |         |           | text color          | hex color code, [scheme color constant](#scheme-colors) or [gradient](#gradients). Ex: `{ color:'0088CC' }` |
+| `fill`       | string  |         |           | fill/bkgd color     | hex color code, [scheme color constant](#scheme-colors) or [gradient](#gradients). Ex: `{ color:'0088CC' }` |
 | `font_face`  | string  |         |           | font face           | Ex: 'Arial' |
 | `font_size`  | number  | points  |           | font size           | 1-256. Ex: `{ font_size:12 }` |
 | `hyperlink`  | string  |         |           | add hyperlink       | object with `url` and optionally `tooltip`. Ex: `{ hyperlink:{url:'https://github.com'} }` |
@@ -522,7 +523,7 @@ slide.addText([ {text:'TEXT', options:{OPTIONS}} ]);
 | `type`       | string  |         | outer     | shadow type         | `outer` or `inner`                       |
 | `angle`      | number  | degrees |           | shadow angle        | 0-359. Ex: `{ angle:180 }`               |
 | `blur`       | number  | points  |           | blur size           | 1-256. Ex: `{ blur:3 }`                  |
-| `color`      | string  |         |           | text color          | hex color code or [scheme color constant](#scheme-colors). Ex: `{ color:'0088CC' }` |
+| `color`      | string  |         |           | text color          | hex color code, [scheme color constant](#scheme-colors) or [gradient](#gradients). Ex: `{ color:'0088CC' }` |
 | `offset`     | number  | points  |           | offset size         | 1-256. Ex: `{ offset:8 }`                |
 | `opacity`    | number  | percent |           | opacity             | 0-1. Ex: `opacity:0.75`                  |
 
@@ -653,9 +654,9 @@ tables. Use this option to ensure there is no wasted space and to guarantee a pr
 | `bold`       | boolean |        | `false`   | bold text          | `true` or `false` |
 | `border`     | object  |        |           | cell border        | object with `pt` and `color` values. Ex: `{pt:'1', color:'f1f1f1'}` |
 | `border`     | array   |        |           | cell border        | array of objects with `pt` and `color` values in TRBL order. |
-| `color`      | string  |        |           | text color         | hex color code or [scheme color constant](#scheme-colors). Ex: `{color:'0088CC'}` |
+| `color`      | string  |        |           | text color         | hex color code, [scheme color constant](#scheme-colors) or [gradient](#gradients). Ex: `{color:'0088CC'}` |
 | `colspan`    | integer |        |           | column span        | 2-n. Ex: `{colspan:2}` |
-| `fill`       | string  |        |           | fill/bkgd color    | hex color code or [scheme color constant](#scheme-colors). Ex: `{color:'0088CC'}` |
+| `fill`       | string  |        |           | fill/bkgd color    | hex color code, [scheme color constant](#scheme-colors) or [gradient](#gradients). Ex: `{color:'0088CC'}` |
 | `font_face`  | string  |        |           | font face          | Ex: 'Arial' |
 | `font_size`  | number  | points |           | font size          | 1-256. Ex: `{font_size:12}` |
 | `italic`     | boolean |        | `false`   | italic text        | `true` or `false` |
@@ -779,11 +780,11 @@ Check the `pptxgen.shapes.js` file for a complete list of the hundreds of PowerP
 | `w`          | number  | inches |           | width               | 0-n OR 'n%'. (Ex: `{w:'50%'}` will make object 50% width of the Slide) |
 | `h`          | number  | inches |           | height              | 0-n OR 'n%'. |
 | `align`      | string  |        | `left`    | alignment           | `left` or `center` or `right` |
-| `fill`       | string  |        |           | fill/bkgd color     | hex color code or [scheme color constant](#scheme-colors). Ex: `{color:'0088CC'}` |
+| `fill`       | string  |        |           | fill/bkgd color     | hex color code, [scheme color constant](#scheme-colors) or [gradient](#gradients). Ex: `{color:'0088CC'}` |
 | `fill`       | object |   |   | fill/bkgd color | object with `type`, `color` and optional `alpha` keys. Ex: `fill:{type:'solid', color:'0088CC', alpha:25}` |
 | `flipH`      | boolean |        |           | flip Horizontal     | `true` or `false` |
 | `flipV`      | boolean |        |           | flip Vertical       | `true` or `false` |
-| `line`       | string  |        |           | border line color   | hex color code or [scheme color constant](#scheme-colors). Ex: `{line:'0088CC'}` |
+| `line`       | string  |        |           | border line color   | hex color code, [scheme color constant](#scheme-colors) or [gradient](#gradients). Ex: `{line:'0088CC'}` |
 | `line_dash`  | string  |       | `solid` | border line dash style | `dash`, `dashDot`, `lgDash`, `lgDashDot`, `lgDashDotDot`, `solid`, `sysDash` or `sysDot` |
 | `line_head`  | string  |        |           | border line ending  | `arrow`, `diamond`, `oval`, `stealth`, `triangle` or `none` |
 | `line_size`  | number  | points |           | border line size    | 1-256. Ex: {line_size:4} |
@@ -1013,7 +1014,7 @@ pptx.save();
 ## Slide Master Object Options
 | Option        | Type    | Unit   | Default  | Description  | Possible Values       |
 | :------------ | :------ | :----- | :------- | :----------- | :-------------------- |
-| `bkgd`        | string  |        | `ffffff` | color        | hex color code or [scheme color constant](#scheme-colors). Ex: `{ bkgd:'0088CC' }` |
+| `bkgd`        | string  |        | `ffffff` | color        | hex color code, [scheme color constant](#scheme-colors) or [gradient](#gradients). Ex: `{ bkgd:'0088CC' }` |
 | `bkgd`        | object  |        |          | image | object with path OR data. Ex: `{path:'img/bkgd.png'}` OR `{data:'image/png;base64,iVBORwTwB[...]='}` |
 | `slideNumber` | object  |        |          | Show slide numbers | ex: `{ x:1.0, y:'50%' }` `x` and `y` can be either inches or percent |
 | `margin`      | number  | inches | `1.0`    | Slide margins      | 0.0 through Slide.width |
@@ -1199,6 +1200,31 @@ The colors file contains a complete PowerPoint palette definition.
 ```javascript
 <script lang="javascript" src="PptxGenJS/dist/pptxgen.colors.js"></script>
 ```
+
+# Gradients
+Most of the color properties support color gradient definition. There are two types - `lin` (linear) and `path`. Both of these can consists of unlimited number of color (hexa code or scheme) points. For example:
+
+```javascript
+slide.addText('Hello',  {
+  color: {
+	gradient: 'lin',
+	angle: 90 // degrees,
+	points: [{
+	  color: 'accent1',
+	  position: 0 // %
+	}, {
+	  color: 'ff00ff',
+	  position: 50 // %
+	  opacity: 25 // %
+	}, {
+	  color: 'accent4',
+	  position: 50 // %
+	}]
+  }
+);
+```
+
+To create a two-color sharp-edged gradient, use three color points. The first at position 0 %, the second at position of the edge (eg. 50 %) and the last at as-near-as-possible position (50.001 %).
 
 **************************************************************************************************
 # Performance Considerations
