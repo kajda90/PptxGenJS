@@ -1538,18 +1538,44 @@ var PptxGenJS = function(){
 		 * @param {string} innerElements Additional elements that adjust the color and are enclosed by the color element.
 		 */
 		colorToXml: function(colorOpts, innerElements) {
-			var isHexaRgb = REGEX_HEX_COLOR.test(colorOpts);
-			if (!isHexaRgb && SCHEME_COLOR_NAMES.indexOf(colorOpts) === -1) {
-				console.warn('"' + colorOpts + '" is not a valid scheme color or hexa RGB, black is used as a fallback. 6-digit RGB or these values are accepted: ' + SCHEME_COLOR_NAMES.join(', '));
-				colorOpts = '000000';
+			if (typeof(colorOpts) === "string") {
+				return gObjPptxGenerators.solidFillToXml(colorOpts, innerElements);
 			}
-			var tagName = isHexaRgb ? 'srgbClr' : 'schemeClr';
-			var colorAttr = ' val="'+ colorOpts +'"';
-			return '<a:solidFill>' + (innerElements ? '<a:'+ tagName + colorAttr +'>'+ innerElements +'</a:'+ tagName +'>' : '<a:'+ tagName + colorAttr +' />') + '</a:solidFill>'
+			else if (colorOpts.gradient) {
+				return gObjPptxGenerators.gradientFillToXml(colorOpts, innerElements);
+			}
+			throw new Error('Unexpected color property value.')
 		},
 
-		gradientToXml: function gradientToXml(opts) {
+		solidFillToXml: function solidFillToXml(colorStr, innerElements, stripEnclosingTag) {
+			var isHexaRgb = REGEX_HEX_COLOR.test(colorStr);
+			if (!isHexaRgb && SCHEME_COLOR_NAMES.indexOf(colorStr) === -1) {
+				console.warn('"' + colorStr + '" is not a valid scheme color or hexa RGB, black is used as a fallback. 6-digit RGB or these values are accepted: ' + SCHEME_COLOR_NAMES.join(', '));
+				colorStr = '000000';
+			}
+			var tagName = isHexaRgb ? 'srgbClr' : 'schemeClr';
+			var colorAttr = ' val="'+ colorStr +'"';
+			var clrXml = innerElements ? '<a:'+ tagName + colorAttr +'>'+ innerElements +'</a:'+ tagName +'>' : '<a:'+ tagName + colorAttr +' />'
+			return stripEnclosingTag ? clrXml : ('<a:solidFill>' + clrXml + '</a:solidFill>');
+		},
 
+		gradientFillToXml: function gradientToXml(gradientOpts, innerElements) {
+			var type = gradientOpts.gradient,
+				angle = gradientOpts.angle,
+				pts = gradientOpts.points,
+				ptsXml = pts.map(function(point) {
+					var opacityEl = point.opacity !== undefined ? '<a:alpha val="'+ (point.opacity * 1000) +'"/>' : null;
+					return '<a:gs pos="' + (point.position * 1000) + '">' + gObjPptxGenerators.solidFillToXml(point.color, opacityEl, true) + '</a:gs>';
+				}),
+				gradientPropsXml = '<a:' + type + ' ang="' + convertRotationDegrees(angle || 0) + '" scaled="1" />';
+				return [
+					'<a:gradFill flip="none" rotWithShape="1">',
+						'<a:gsLst>' + ptsXml.join('') + '</a:gsLst>',
+						innerElements,
+						gradientPropsXml,
+						'<a:tileRect />',
+					'</a:gradFill>'
+				].join('')
 		},
 
 		/**
@@ -3433,10 +3459,13 @@ var PptxGenJS = function(){
 
 		if ( color_info ) {
 			if ( typeof color_info == 'string' ) colorVal = color_info;
-			else {
+			else if (!color_info.gradient) {
 				if ( color_info.type  ) fillType = color_info.type;
 				if ( color_info.color ) colorVal = color_info.color;
 				if ( color_info.alpha ) internalElements += '<a:alpha val="' + (100 - color_info.alpha) + '000"/>';
+			}
+			else {
+				colorVal = color_info
 			}
 
 			switch ( fillType ) {
@@ -3445,7 +3474,7 @@ var PptxGenJS = function(){
 					break;
 			}
 		}
-
+		console.log(colorVal, fillType)
 		return outText;
 	}
 
