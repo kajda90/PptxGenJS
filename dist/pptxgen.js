@@ -979,7 +979,7 @@ var PptxGenJS = function(){
 									var cellValign  = (cellOpts.valign)     ? ' anchor="'+ cellOpts.valign.replace(/^c$/i,'ctr').replace(/^m$/i,'ctr').replace('center','ctr').replace('middle','ctr').replace('top','t').replace('btm','b').replace('bottom','b') +'"' : '';
 									var cellColspan = (cellOpts.colspan)    ? ' gridSpan="'+ cellOpts.colspan +'"' : '';
 									var cellRowspan = (cellOpts.rowspan)    ? ' rowSpan="'+ cellOpts.rowspan +'"' : '';
-									var cellFill    = ((cell.optImp && cell.optImp.fill)  || cellOpts.fill ) ? gObjPptxGenerators.colorToXml((cell.optImp && cell.optImp.fill) || cellOpts.fill.replace('#','')) : '';
+									var cellFill    = ((cell.optImp && cell.optImp.fill)  || cellOpts.fill ) ? gObjPptxGenerators.colorToXml((cell.optImp && cell.optImp.fill) || cellOpts.fill) : '';
 									var cellMargin  = ( cellOpts.margin == 0 || cellOpts.margin ? cellOpts.margin : (cellOpts.marginPt || DEF_CELL_MARGIN_PT) );
 									if ( !Array.isArray(cellMargin) && typeof cellMargin === 'number' ) cellMargin = [cellMargin,cellMargin,cellMargin,cellMargin];
 									cellMargin = ' marL="'+ cellMargin[3]*ONEPT +'" marR="'+ cellMargin[1]*ONEPT +'" marT="'+ cellMargin[0]*ONEPT +'" marB="'+ cellMargin[2]*ONEPT +'"';
@@ -3952,7 +3952,7 @@ var PptxGenJS = function(){
 								var cellValign  = (cellOpts.valign)     ? ' anchor="'+ cellOpts.valign.replace(/^c$/i,'ctr').replace(/^m$/i,'ctr').replace('center','ctr').replace('middle','ctr').replace('top','t').replace('btm','b').replace('bottom','b') +'"' : '';
 								var cellColspan = (cellOpts.colspan)    ? ' gridSpan="'+ cellOpts.colspan +'"' : '';
 								var cellRowspan = (cellOpts.rowspan)    ? ' rowSpan="'+ cellOpts.rowspan +'"' : '';
-								var cellFill    = ((cell.optImp && cell.optImp.fill)  || cellOpts.fill ) ? gObjPptxGenerators.colorToXml((cell.optImp && cell.optImp.fill) || cellOpts.fill.replace('#','')): '';
+								var cellFill    = ((cell.optImp && cell.optImp.fill)  || cellOpts.fill ) ? gObjPptxGenerators.colorToXml((cell.optImp && cell.optImp.fill) || cellOpts.fill): '';
 								var optFill     = (cell.optImp && cell.optImp.fill)  || cellOpts.fill;
 								var imgFill     = cellOpts.imgFill;
 								if (imgFill) {
