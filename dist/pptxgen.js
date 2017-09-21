@@ -2385,7 +2385,6 @@ var PptxGenJS = function(){
 		strXml += gObjPptxGenerators.colorToXml(color, '<a:alpha val="'+ opacity +'"/>', true);
 		strXml += '</a:'+ type +'Shdw>';
 		strXml += '</a:effectLst>';
-		console.log(strXml)
 		return strXml;
 	}
 
