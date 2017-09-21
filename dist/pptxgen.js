@@ -979,7 +979,7 @@ var PptxGenJS = function(){
 									var cellValign  = (cellOpts.valign)     ? ' anchor="'+ cellOpts.valign.replace(/^c$/i,'ctr').replace(/^m$/i,'ctr').replace('center','ctr').replace('middle','ctr').replace('top','t').replace('btm','b').replace('bottom','b') +'"' : '';
 									var cellColspan = (cellOpts.colspan)    ? ' gridSpan="'+ cellOpts.colspan +'"' : '';
 									var cellRowspan = (cellOpts.rowspan)    ? ' rowSpan="'+ cellOpts.rowspan +'"' : '';
-									var cellFill    = ((cell.optImp && cell.optImp.fill)  || cellOpts.fill ) ? ' <a:solidFill>' + createColorElement((cell.optImp && cell.optImp.fill) || cellOpts.fill.replace('#','')) +'</a:solidFill>' : '';
+									var cellFill    = ((cell.optImp && cell.optImp.fill)  || cellOpts.fill ) ? gObjPptxGenerators.colorToXml((cell.optImp && cell.optImp.fill) || cellOpts.fill.replace('#','')) : '';
 									var cellMargin  = ( cellOpts.margin == 0 || cellOpts.margin ? cellOpts.margin : (cellOpts.marginPt || DEF_CELL_MARGIN_PT) );
 									if ( !Array.isArray(cellMargin) && typeof cellMargin === 'number' ) cellMargin = [cellMargin,cellMargin,cellMargin,cellMargin];
 									cellMargin = ' marL="'+ cellMargin[3]*ONEPT +'" marR="'+ cellMargin[1]*ONEPT +'" marT="'+ cellMargin[0]*ONEPT +'" marB="'+ cellMargin[2]*ONEPT +'"';
@@ -998,15 +998,15 @@ var PptxGenJS = function(){
 
 								// 5: Borders: Add any borders
 								if ( cellOpts.border && typeof cellOpts.border === 'string' ) {
-									strXml += '  <a:lnL w="'+ ONEPT +'" cap="flat" cmpd="sng" algn="ctr"><a:solidFill>' + createColorElement(cellOpts.border) + '</a:solidFill></a:lnL>';
-									strXml += '  <a:lnR w="'+ ONEPT +'" cap="flat" cmpd="sng" algn="ctr"><a:solidFill>' + createColorElement(cellOpts.border) + '</a:solidFill></a:lnR>';
-									strXml += '  <a:lnT w="'+ ONEPT +'" cap="flat" cmpd="sng" algn="ctr"><a:solidFill>' + createColorElement(cellOpts.border) + '</a:solidFill></a:lnT>';
-									strXml += '  <a:lnB w="'+ ONEPT +'" cap="flat" cmpd="sng" algn="ctr"><a:solidFill>' + createColorElement(cellOpts.border) + '</a:solidFill></a:lnB>';
+									strXml += '  <a:lnL w="'+ ONEPT +'" cap="flat" cmpd="sng" algn="ctr">' + gObjPptxGenerators.colorToXml(cellOpts.border) + '</a:lnL>';
+									strXml += '  <a:lnR w="'+ ONEPT +'" cap="flat" cmpd="sng" algn="ctr">' + gObjPptxGenerators.colorToXml(cellOpts.border) + '</a:lnR>';
+									strXml += '  <a:lnT w="'+ ONEPT +'" cap="flat" cmpd="sng" algn="ctr">' + gObjPptxGenerators.colorToXml(cellOpts.border) + '</a:lnT>';
+									strXml += '  <a:lnB w="'+ ONEPT +'" cap="flat" cmpd="sng" algn="ctr">' + gObjPptxGenerators.colorToXml(cellOpts.border) + '</a:lnB>';
 								}
 								else if ( cellOpts.border && Array.isArray(cellOpts.border) ) {
 									$.each([ {idx:3,name:'lnL'}, {idx:1,name:'lnR'}, {idx:0,name:'lnT'}, {idx:2,name:'lnB'} ], function(i,obj){
 										if ( cellOpts.border[obj.idx] ) {
-											var strC = '<a:solidFill>' + createColorElement((cellOpts.border[obj.idx].color) ? cellOpts.border[obj.idx].color : '666666') + '</a:solidFill>';
+											var strC = gObjPptxGenerators.colorToXml((cellOpts.border[obj.idx].color) ? cellOpts.border[obj.idx].color : '666666');
 											var intW = (cellOpts.border[obj.idx] && (cellOpts.border[obj.idx].pt || cellOpts.border[obj.idx].pt == 0)) ? (ONEPT * Number(cellOpts.border[obj.idx].pt)) : ONEPT;
 											strXml += '<a:'+ obj.name +' w="'+ intW +'" cap="flat" cmpd="sng" algn="ctr">'+ strC +'</a:'+ obj.name +'>';
 										}
@@ -1015,7 +1015,7 @@ var PptxGenJS = function(){
 								}
 								else if ( cellOpts.border && typeof cellOpts.border === 'object' ) {
 									var intW = (cellOpts.border && (cellOpts.border.pt || cellOpts.border.pt == 0) ) ? (ONEPT * Number(cellOpts.border.pt)) : ONEPT;
-									var strClr = '<a:solidFill>' + createColorElement((cellOpts.border.color) ? cellOpts.border.color.replace('#','') : '666666') + '</a:solidFill>';
+									var strClr = gObjPptxGenerators.colorToXml((cellOpts.border.color) ? cellOpts.border.color.replace('#','') : '666666');
 									var strAttr = '<a:prstDash val="';
 									strAttr += ((cellOpts.border.type && cellOpts.border.type.toLowerCase().indexOf('dash') > -1) ? "sysDash" : "solid" );
 									strAttr += '"/><a:round/><a:headEnd type="none" w="med" len="med"/><a:tailEnd type="none" w="med" len="med"/>';
@@ -1116,7 +1116,7 @@ var PptxGenJS = function(){
 							strSlideXml += '<a:'+ slideItemObj.options.shadow.type +'Shdw sx="100000" sy="100000" kx="0" ky="0" ';
 							strSlideXml += ' algn="bl" rotWithShape="0" blurRad="'+ slideItemObj.options.shadow.blur +'" ';
 							strSlideXml += ' dist="'+ slideItemObj.options.shadow.offset +'" dir="'+ slideItemObj.options.shadow.angle +'">';
-							strSlideXml +=   createColorElement(slideItemObj.options.shadow.color, '<a:alpha val="'+ slideItemObj.options.shadow.opacity +'"/>');
+							strSlideXml +=   gObjPptxGenerators.colorToXml(slideItemObj.options.shadow.color, '<a:alpha val="'+ slideItemObj.options.shadow.opacity +'"/>');
 							strSlideXml += '</a:outerShdw>';
 							strSlideXml += '</a:effectLst>';
 						}
@@ -1533,6 +1533,26 @@ var PptxGenJS = function(){
 		},
 
 		/**
+		 * Depending on the passed color string, creates either `a:schemeClr` (when scheme color) or `a:srgbClr` (when hexa representation).
+		 * @param {string} color hexa representation (eg. "FFFF00") or a scheme color constant (eg. colors.ACCENT1)
+		 * @param {string} innerElements Additional elements that adjust the color and are enclosed by the color element.
+		 */
+		colorToXml: function(colorOpts, innerElements) {
+			var isHexaRgb = REGEX_HEX_COLOR.test(colorOpts);
+			if (!isHexaRgb && SCHEME_COLOR_NAMES.indexOf(colorOpts) === -1) {
+				console.warn('"' + colorOpts + '" is not a valid scheme color or hexa RGB, black is used as a fallback. 6-digit RGB or these values are accepted: ' + SCHEME_COLOR_NAMES.join(', '));
+				colorOpts = '000000';
+			}
+			var tagName = isHexaRgb ? 'srgbClr' : 'schemeClr';
+			var colorAttr = ' val="'+ colorOpts +'"';
+			return '<a:solidFill>' + (innerElements ? '<a:'+ tagName + colorAttr +'>'+ innerElements +'</a:'+ tagName +'>' : '<a:'+ tagName + colorAttr +' />') + '</a:solidFill>'
+		},
+
+		gradientToXml: function gradientToXml(opts) {
+
+		},
+
+		/**
 		 * Based on passed data, creates Excel Worksheet that is used as a data source for a chart.
 		 * @param {Object} chartObject chart object
 		 * @param {ZipObject} zip zip file that the resulting XLSX should be added to
@@ -1887,22 +1907,6 @@ var PptxGenJS = function(){
 	function componentToHex(c) {
 		var hex = c.toString(16);
 		return hex.length == 1 ? "0" + hex : hex;
-	}
-
-	/**
-	 * DESC: Depending on the passed color string, creates either `a:schemeClr` (when scheme color) or `a:srgbClr` (when hexa representation).
-	 * color (string): hexa representation (eg. "FFFF00") or a scheme color constant (eg. colors.ACCENT1)
-	 * innerElements (optional string): Additional elements that adjust the color and are enclosed by the color element.
-	 */
-	function createColorElement(colorStr, innerElements) {
-		var isHexaRgb = REGEX_HEX_COLOR.test(colorStr);
-		if (!isHexaRgb && SCHEME_COLOR_NAMES.indexOf(colorStr) === -1) {
-			console.warn('"' + colorStr + '" is not a valid scheme color or hexa RGB, black is used as a fallback. 6-digit RGB or these values are accepted: ' + SCHEME_COLOR_NAMES.join(', '));
-			colorStr = '000000';
-		}
-		var tagName = isHexaRgb ? 'srgbClr' : 'schemeClr';
-		var colorAttr = ' val="'+ colorStr +'"';
-		return innerElements ? '<a:'+ tagName + colorAttr +'>'+ innerElements +'</a:'+ tagName +'>' : '<a:'+ tagName + colorAttr +' />';
 	}
 
 	/**
@@ -2352,7 +2356,7 @@ var PptxGenJS = function(){
 		strXml += '<a:'+ type +'Shdw sx="100000" sy="100000" kx="0" ky="0" ';
 		strXml += ' algn="bl" rotWithShape="'+ (+rotateWithShape) +'" blurRad="'+ blur +'" ';
 		strXml += ' dist="'+ offset +'" dir="'+ angle +'">';
-		strXml += createColorElement(color, '<a:alpha val="'+ opacity +'"/>');
+		strXml += gObjPptxGenerators.colorToXml(color, '<a:alpha val="'+ opacity +'"/>');
 		strXml += '</a:'+ type +'Shdw>';
 		strXml += '</a:effectLst>';
 
@@ -2420,7 +2424,7 @@ var PptxGenJS = function(){
 		strXml =  '<'+ tagName + '>';
 		strXml += ' <c:spPr>';
 		strXml += '  <a:ln w="' + Math.round((glOpts.size || defaults.size) * ONEPT) +'" cap="flat">';
-		strXml += '  <a:solidFill>' + createColorElement(glOpts.color || defaults.color); // should accept scheme colors as implemented in PR 135
+		strXml += gObjPptxGenerators.colorToXml(glOpts.color || defaults.color);
 		strXml += '   <a:prstDash val="' + (glOpts.style || defaults.style) + '"/><a:round/>';
 		strXml += '  </a:ln>';
 		strXml += ' </c:spPr>';
@@ -2553,7 +2557,7 @@ var PptxGenJS = function(){
 			strXml =  '<'+ tagName + '>';
 			strXml += ' <c:spPr>';
 			strXml += '  <a:ln w="' + Math.round((glOpts.size || defaults.size) * ONEPT) +'" cap="flat">';
-			strXml += '  <a:solidFill>'+ createColorElement(glOpts.color || defaults.color) +'</a:solidFill>';
+			strXml += gObjPptxGenerators.colorToXml(glOpts.color || defaults.color);
 			strXml += '   <a:prstDash val="' + (glOpts.style || defaults.style) + '"/><a:round/>';
 			strXml += '  </a:ln>';
 			strXml += ' </c:spPr>';
@@ -2641,19 +2645,19 @@ var PptxGenJS = function(){
 					strXml += '  <c:spPr>';
 
 					if ( rel.opts.chartColorsOpacity ) {
-						strXml += '    <a:solidFill>'+ createColorElement(strSerColor, '<a:alpha val="' + (rel.opts.chartColorsOpacity * 1000) + '"/>') +'</a:solidFill>';
+						strXml += gObjPptxGenerators.colorToXml(strSerColor, '<a:alpha val="' + (rel.opts.chartColorsOpacity * 1000) + '"/>');
 					}
 					else {
-						strXml += '    <a:solidFill>'+ createColorElement(strSerColor) +'</a:solidFill>';
+						strXml += gObjPptxGenerators.colorToXml(strSerColor);
 					}
 
 					if ( rel.opts.type == 'line') {
-						strXml += '<a:ln w="'+ (rel.opts.lineSize * ONEPT) +'" cap="flat"><a:solidFill>' + createColorElement(strSerColor) +'</a:solidFill>';
+						strXml += '<a:ln w="'+ (rel.opts.lineSize * ONEPT) +'" cap="flat">' + gObjPptxGenerators.colorToXml(strSerColor);
 						strXml += '<a:prstDash val="' + (rel.opts.line_dash || "solid") + '"/><a:round/></a:ln>';
 					}
 					else if ( rel.opts.dataBorder ) {
 						var color = rel.opts.type === 'area' ? strSerColor : rel.opts.dataBorder.color;
-						strXml += '<a:ln w="'+ (rel.opts.dataBorder.pt * ONEPT) +'" cap="flat"><a:solidFill>'+ createColorElement(color, '<a:alpha val="' + (rel.opts.dataBorder.opacity * 1000) + '"/>') +'</a:solidFill><a:prstDash val="solid"/><a:round/></a:ln>';
+						strXml += '<a:ln w="'+ (rel.opts.dataBorder.pt * ONEPT) +'" cap="flat">'+ gObjPptxGenerators.colorToXml(color, '<a:alpha val="' + (rel.opts.dataBorder.opacity * 1000) + '"/>') +'<a:prstDash val="solid"/><a:round/></a:ln>';
 					}
 					strXml += createShadowElement(rel.opts.lineShadow || 'none', DEF_LINE_SHADOW);
 					strXml += '  </c:spPr>';
@@ -2664,8 +2668,8 @@ var PptxGenJS = function(){
 						strXml += '  <c:symbol val="'+ rel.opts.lineDataSymbol +'"/>';
 						if ( rel.opts.lineDataSymbolSize ) strXml += '  <c:size val="'+ rel.opts.lineDataSymbolSize +'"/>'; // Defaults to "auto" otherwise (but this is usually too small, so there is a default)
 						strXml += '  <c:spPr>';
-	  					strXml += '    <a:solidFill>' + createColorElement(rel.opts.chartColors[(idx+1 > rel.opts.chartColors.length ? (Math.floor(Math.random() * rel.opts.chartColors.length)) : idx)]) +'</a:solidFill>';
-						strXml += '    <a:ln w="9525" cap="flat"><a:solidFill>'+ createColorElement(strSerColor) +'</a:solidFill><a:prstDash val="solid"/><a:round/></a:ln>';
+	  					strXml += gObjPptxGenerators.colorToXml(rel.opts.chartColors[(idx+1 > rel.opts.chartColors.length ? (Math.floor(Math.random() * rel.opts.chartColors.length)) : idx)]);
+						strXml += '    <a:ln w="9525" cap="flat">'+ gObjPptxGenerators.colorToXml(strSerColor) +'<a:prstDash val="solid"/><a:round/></a:ln>';
 						strXml += 	   createShadowElement(rel.opts.lineShadow || 'none', DEF_LINE_SHADOW);
 						strXml += '  </c:spPr>';
 						strXml += '</c:marker>';
@@ -2684,7 +2688,7 @@ var PptxGenJS = function(){
 							strXml += '    	<c:bubble3D val="0"/>';
 							strXml += '    	<c:spPr>';
 							strXml += '    <a:solidFill>';
-							strXml +=       createColorElement(colors[index % colors.length]);
+							strXml +=       gObjPptxGenerators.colorToXml(colors[index % colors.length]);
 							strXml += '    </a:solidFill>';
 							strXml += 	   createShadowElement(rel.opts.lineShadow || 'none', DEF_LINE_SHADOW);
 							strXml += '    </c:spPr>';
@@ -2700,7 +2704,7 @@ var PptxGenJS = function(){
 					strXml += '      <a:lstStyle/>';
 					strXml += '      <a:p><a:pPr>';
 					strXml += '        <a:defRPr b="0" i="0" strike="noStrike" sz="'+ (rel.opts.dataLabelFontSize || DEF_FONT_SIZE) +'00" u="none">';
-					strXml += '          <a:solidFill>'+ createColorElement(rel.opts.dataLabelColor || '000000') +'</a:solidFill>';
+					strXml += gObjPptxGenerators.colorToXml(rel.opts.dataLabelColor || '000000');
 					strXml += '          <a:latin typeface="'+ (rel.opts.dataLabelFontFace || 'Arial') +'"/>';
 					strXml += '        </a:defRPr>';
 					strXml += '      </a:pPr></a:p>';
@@ -2781,9 +2785,7 @@ var PptxGenJS = function(){
 					strXml += ' <c:spPr>';
 					strXml += '   <a:ln w="12700" cap="flat">';
 					if ( !!rel.opts.catAxisLineShow || typeof rel.opts.catAxisLineShow === 'undefined' ) {
-						strXml += '<a:solidFill>';
-						strXml +=    createColorElement(rel.opts.axisLineColor ? rel.opts.axisLineColor : DEF_CHART_GRIDLINE.color);
-						strXml += '</a:solidFill>';
+						strXml += gObjPptxGenerators.colorToXml(rel.opts.axisLineColor ? rel.opts.axisLineColor : DEF_CHART_GRIDLINE.color);
 					}
 					else {
 						strXml += '<a:noFill/>';
@@ -2801,7 +2803,7 @@ var PptxGenJS = function(){
 					strXml += '    <a:p>';
 					strXml += '    <a:pPr>';
 					strXml += '<a:defRPr b="0" i="0" strike="noStrike" sz="'+ (rel.opts.catAxisLabelFontSize || DEF_FONT_SIZE) +'00" u="none">';
-					strXml += '<a:solidFill>'+ createColorElement(rel.opts.catAxisLabelColor || '000000') +'</a:solidFill>';
+					strXml += gObjPptxGenerators.colorToXml(rel.opts.catAxisLabelColor || '000000');
 					strXml += '<a:latin typeface="'+ (rel.opts.catAxisLabelFontFace || 'Arial') +'"/>';
 					strXml += '   </a:defRPr>';
 					strXml += '  </a:pPr>';
@@ -2844,9 +2846,7 @@ var PptxGenJS = function(){
 					strXml += ' <c:spPr>';
 					strXml += '   <a:ln w="12700" cap="flat">';
 					if ( !!rel.opts.valAxisLineShow || typeof rel.opts.valAxisLineShow === 'undefined' ) {
-						strXml += '<a:solidFill>';
-						strXml +=    createColorElement(rel.opts.axisLineColor ? rel.opts.axisLineColor : DEF_CHART_GRIDLINE.color);
-						strXml += '</a:solidFill>';
+						strXml += gObjPptxGenerators.colorToXml(rel.opts.axisLineColor ? rel.opts.axisLineColor : DEF_CHART_GRIDLINE.color);
 					}
 					else {
 						strXml += '<a:noFill/>';
@@ -2861,7 +2861,7 @@ var PptxGenJS = function(){
 					strXml += '  <a:p>';
 					strXml += '    <a:pPr>';
 					strXml += '      <a:defRPr b="0" i="0" strike="noStrike" sz="'+ (rel.opts.valAxisLabelFontSize || DEF_FONT_SIZE) +'00" u="none">';
-					strXml += '        <a:solidFill>'+ createColorElement(rel.opts.valAxisLabelColor || '000000') +'</a:solidFill>';
+					strXml += gObjPptxGenerators.colorToXml(rel.opts.valAxisLabelColor || '000000');
 					strXml += '        <a:latin typeface="'+ (rel.opts.valAxisLabelFontFace || 'Arial') +'"/>';
 					strXml += '      </a:defRPr>';
 					strXml += '    </a:pPr>';
@@ -2924,9 +2924,9 @@ var PptxGenJS = function(){
 					strXml += '  <c:idx val="'+ idx +'"/>';
 					strXml += '  <c:explosion val="0"/>';
 					strXml += '  <c:spPr>';
-					strXml += '    <a:solidFill>'+ createColorElement(rel.opts.chartColors[(idx+1 > rel.opts.chartColors.length ? (Math.floor(Math.random() * rel.opts.chartColors.length)) : idx)]) +'</a:solidFill>';
+					strXml += gObjPptxGenerators.colorToXml(rel.opts.chartColors[(idx+1 > rel.opts.chartColors.length ? (Math.floor(Math.random() * rel.opts.chartColors.length)) : idx)]);
 					if ( rel.opts.dataBorder ) {
-						strXml += '<a:ln w="'+ (rel.opts.dataBorder.pt * ONEPT) +'" cap="flat"><a:solidFill>'+ createColorElement(rel.opts.dataBorder.color) +'</a:solidFill><a:prstDash val="solid"/><a:round/></a:ln>';
+						strXml += '<a:ln w="'+ (rel.opts.dataBorder.pt * ONEPT) +'" cap="flat">'+ gObjPptxGenerators.colorToXml(rel.opts.dataBorder.color) +'<a:prstDash val="solid"/><a:round/></a:ln>';
 					}
 					strXml += '    <a:effectLst>';
 					strXml += '      <a:outerShdw sx="100000" sy="100000" kx="0" ky="0" algn="tl" rotWithShape="1" blurRad="38100" dist="23000" dir="5400000">';
@@ -2947,7 +2947,7 @@ var PptxGenJS = function(){
 					strXml += '      <a:bodyPr/><a:lstStyle/>';
 					strXml += '      <a:p><a:pPr>';
 					strXml += '        <a:defRPr b="0" i="0" strike="noStrike" sz="'+ (rel.opts.dataLabelFontSize || DEF_FONT_SIZE) +'00" u="none">';
-					strXml += '          <a:solidFill>'+ createColorElement(rel.opts.dataLabelColor || '000000') +'</a:solidFill>';
+					strXml += gObjPptxGenerators.colorToXml(rel.opts.dataLabelColor || '000000');
 					strXml += '          <a:latin typeface="'+ (rel.opts.dataLabelFontFace || 'Arial') +'"/>';
 					strXml += '        </a:defRPr>';
 					strXml += '      </a:pPr></a:p>';
@@ -3106,13 +3106,13 @@ var PptxGenJS = function(){
 			sizeAttr = ' sz="' + opts.fontSize + '00"';
 		}
 		strXml += '      <a:defRPr b="0" i="0" strike="noStrike"'+ sizeAttr +' u="none">';
-		strXml += '        <a:solidFill>' + createColorElement(opts.color || '000000') + '</a:solidFill>';
+		strXml += gObjPptxGenerators.colorToXml(opts.color || '000000');
 		strXml += '        <a:latin typeface="'+ (opts.fontFace || 'Arial') +'"/>';
 		strXml += '      </a:defRPr>';
 		strXml += '    </a:pPr>';
 		strXml += '    <a:r>';
 		strXml += '      <a:rPr b="0" i="0" strike="noStrike"'+ sizeAttr +' u="none">';
-		strXml += '        <a:solidFill>' + createColorElement(opts.color || '000000') + '</a:solidFill>';
+		strXml += gObjPptxGenerators.colorToXml(opts.color || '000000');
 		strXml += '        <a:latin typeface="'+ (opts.fontFace || 'Arial') +'"/>';
 		strXml += '      </a:rPr>';
 		strXml += '      <a:t>'+ (decodeXmlEntities(opts.title) || '') +'</a:t>';
@@ -3441,7 +3441,7 @@ var PptxGenJS = function(){
 
 			switch ( fillType ) {
 				case 'solid':
-					outText += '<a:solidFill>'+ createColorElement(colorVal, internalElements) + '</a:solidFill>';
+					outText += gObjPptxGenerators.colorToXml(colorVal, internalElements);
 					break;
 			}
 		}
@@ -3920,7 +3920,7 @@ var PptxGenJS = function(){
 								var cellValign  = (cellOpts.valign)     ? ' anchor="'+ cellOpts.valign.replace(/^c$/i,'ctr').replace(/^m$/i,'ctr').replace('center','ctr').replace('middle','ctr').replace('top','t').replace('btm','b').replace('bottom','b') +'"' : '';
 								var cellColspan = (cellOpts.colspan)    ? ' gridSpan="'+ cellOpts.colspan +'"' : '';
 								var cellRowspan = (cellOpts.rowspan)    ? ' rowSpan="'+ cellOpts.rowspan +'"' : '';
-								var cellFill    = ((cell.optImp && cell.optImp.fill)  || cellOpts.fill ) ? ' <a:solidFill>'+ createColorElement((cell.optImp && cell.optImp.fill) || cellOpts.fill.replace('#','')) +'</a:solidFill>' : '';
+								var cellFill    = ((cell.optImp && cell.optImp.fill)  || cellOpts.fill ) ? gObjPptxGenerators.colorToXml((cell.optImp && cell.optImp.fill) || cellOpts.fill.replace('#','')): '';
 								var optFill     = (cell.optImp && cell.optImp.fill)  || cellOpts.fill;
 								var imgFill     = cellOpts.imgFill;
 								if (imgFill) {
@@ -3959,15 +3959,15 @@ var PptxGenJS = function(){
 
 							// 5: Borders: Add any borders
 							if ( cellOpts.border && typeof cellOpts.border === 'string' ) {
-								strXml += '  <a:lnL w="'+ ONEPT +'" cap="flat" cmpd="sng" algn="ctr"><a:solidFill>'+ createColorElement(cellOpts.border) +'</a:solidFill></a:lnL>';
-								strXml += '  <a:lnR w="'+ ONEPT +'" cap="flat" cmpd="sng" algn="ctr"><a:solidFill>'+ createColorElement(cellOpts.border) +'</a:solidFill></a:lnR>';
-								strXml += '  <a:lnT w="'+ ONEPT +'" cap="flat" cmpd="sng" algn="ctr"><a:solidFill>'+ createColorElement(cellOpts.border) +'</a:solidFill></a:lnT>';
-								strXml += '  <a:lnB w="'+ ONEPT +'" cap="flat" cmpd="sng" algn="ctr"><a:solidFill>'+ createColorElement(cellOpts.border) +'</a:solidFill></a:lnB>';
+								strXml += '  <a:lnL w="'+ ONEPT +'" cap="flat" cmpd="sng" algn="ctr">'+ gObjPptxGenerators.colorToXml(cellOpts.border) +'</a:lnL>';
+								strXml += '  <a:lnR w="'+ ONEPT +'" cap="flat" cmpd="sng" algn="ctr">'+ gObjPptxGenerators.colorToXml(cellOpts.border) +'</a:lnR>';
+								strXml += '  <a:lnT w="'+ ONEPT +'" cap="flat" cmpd="sng" algn="ctr">'+ gObjPptxGenerators.colorToXml(cellOpts.border) +'</a:lnT>';
+								strXml += '  <a:lnB w="'+ ONEPT +'" cap="flat" cmpd="sng" algn="ctr">'+ gObjPptxGenerators.colorToXml(cellOpts.border) +'</a:lnB>';
 							}
 							else if ( cellOpts.border && Array.isArray(cellOpts.border) ) {
 								$.each([ {idx:3,name:'lnL'}, {idx:1,name:'lnR'}, {idx:0,name:'lnT'}, {idx:2,name:'lnB'} ], function(i,obj){
 									if ( cellOpts.border[obj.idx] ) {
-										var strC = '<a:solidFill>'+ createColorElement((cellOpts.border[obj.idx].color) ? cellOpts.border[obj.idx].color : '666666') +'</a:solidFill>';
+										var strC = gObjPptxGenerators.colorToXml((cellOpts.border[obj.idx].color) ? cellOpts.border[obj.idx].color : '666666');
 										var intW = (cellOpts.border[obj.idx] && (cellOpts.border[obj.idx].pt || cellOpts.border[obj.idx].pt == 0)) ? (ONEPT * Number(cellOpts.border[obj.idx].pt)) : ONEPT;
 										strXml += '<a:'+ obj.name +' w="'+ intW +'" cap="flat" cmpd="sng" algn="ctr">'+ strC +'</a:'+ obj.name +'>';
 									}
@@ -3976,7 +3976,7 @@ var PptxGenJS = function(){
 							}
 							else if ( cellOpts.border && typeof cellOpts.border === 'object' ) {
 								var intW = (cellOpts.border && (cellOpts.border.pt || cellOpts.border.pt == 0) ) ? (ONEPT * Number(cellOpts.border.pt)) : ONEPT;
-								var strClr = '<a:solidFill>'+ createColorElement((cellOpts.border.color) ? cellOpts.border.color.replace('#','') : '666666') +'</a:solidFill>';
+								var strClr = gObjPptxGenerators.colorToXml((cellOpts.border.color) ? cellOpts.border.color.replace('#','') : '666666');
 								var strAttr = '<a:prstDash val="';
 								strAttr += ((cellOpts.border.type && cellOpts.border.type.toLowerCase().indexOf('dash') > -1) ? "sysDash" : "solid" );
 								strAttr += '"/><a:round/><a:headEnd type="none" w="med" len="med"/><a:tailEnd type="none" w="med" len="med"/>';
