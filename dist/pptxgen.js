@@ -2085,7 +2085,10 @@ var PptxGenJS = function(){
 	function decodeXmlEntities(inStr) {
 		// NOTE: Dont use short-circuit eval here as value c/b "0" (zero) etc.!
 		if ( typeof inStr === 'undefined' || inStr == null ) return "";
-		return inStr.toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/\'/g,'&apos;');
+		if ( typeof inStr !== 'string') return inStr;
+		return inStr.replace(/["'<>\\&]/gim, function (i) {
+			return '&#' + i.charCodeAt(0) + ';';
+		})
 	}
 
 	function createHyperlinkRels(inText, slideRels) {
@@ -2110,7 +2113,7 @@ var PptxGenJS = function(){
 						type: 'hyperlink',
 						data: 'dummy',
 						rId:  intRelId,
-						Target: text.options.hyperlink.url
+						Target: decodeXmlEntities(text.options.hyperlink.url)
 					});
 
 					text.options.hyperlink.rId = intRelId;
