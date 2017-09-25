@@ -2712,9 +2712,7 @@ var PptxGenJS = function(){
 							strXml += '    	<c:invertIfNegative val="'+invert+'"/>';
 							strXml += '    	<c:bubble3D val="0"/>';
 							strXml += '    	<c:spPr>';
-							strXml += '    <a:solidFill>';
 							strXml +=       gObjPptxGenerators.colorToXml(colors[index % colors.length]);
-							strXml += '    </a:solidFill>';
 							strXml += 	   createShadowElement(rel.opts.lineShadow || 'none', DEF_LINE_SHADOW);
 							strXml += '    </c:spPr>';
 							strXml += '  </c:dPt>';
