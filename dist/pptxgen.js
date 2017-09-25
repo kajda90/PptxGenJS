@@ -351,6 +351,12 @@ var PptxGenJS = function(){
 			opt.lineSpacing = opt.lineSpacing || placeholder && placeholder.options.align;
 			opt.autoFit = opt.autoFit || placeholder && placeholder.options.autoFit;
 			opt.shadow = opt.shadow || placeholder && placeholder.options.shadow;
+			opt.autoFit = opt.autoFit || placeholder && placeholder.options.autoFit;
+			opt.lineSpacing = opt.lineSpacing || placeholder && placeholder.options.lineSpacing;
+			opt.inset = opt.inset || placeholder && placeholder.options.inset;
+
+			opt.line = opt.line || placeholder && placeholder.options.line;
+			opt.line_size = opt.line_size || placeholder && placeholder.options.line_size;
 
 			// ROBUST: Convert attr values that will likely be passed by users to valid OOXML values
 			if ( opt.valign ) opt.valign = opt.valign.toLowerCase().replace(/^c.*/i,'ctr').replace(/^m.*/i,'ctr').replace(/^t.*/i,'t').replace(/^b.*/i,'b');
