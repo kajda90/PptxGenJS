@@ -744,14 +744,14 @@ var PptxGenJS = function(){
 			// Inherit placeholders from master slide
 			if (!target.isMaster) {
 				var index = target.placeholders.length;
-				if (usedPlaceholderTypes.indexOf('sldNum') !== -1) {
-					target.hasSlideNumber = true  // placeholder sldNum is explicitly defined for layout
+				if (usedPlaceholderTypes.indexOf('slideNumber') !== -1) {
+					target.hasSlideNumber = true  // placeholder slideNumber is explicitly defined for layout
 				}
 				gObjPptx.masterSlide.placeholders.forEach(function(object, idx) {
 					if (object.type && PLACEHOLDERS_TO_INHERIT_FROM_MASTER_SLIDE.indexOf(object.type) != -1 && usedPlaceholderTypes.indexOf(object.type) == -1) {
 						var inheritPlaceholder = true;
 
-						if (object.type == 'sldNum') {
+						if (object.type == 'slideNumber') {
 							if (slideDef.hasSlideNumber === false) {  // slide number is suppressed for this SlideLayout
 								inheritPlaceholder = false;
 							}
@@ -3375,7 +3375,7 @@ var PptxGenJS = function(){
 		var xmlTextRun = '';
 		var paraProp = '';
 		var parsedText;
-		var isSlideNumber = opts.placeholder && 'sldNum' === opts.placeholder.type;
+		var isSlideNumber = opts.placeholder && 'slideNumber' === opts.placeholder.type;
 		var openTag = isSlideNumber ? '<a:fld id="' + SLDNUMFLDID + '" type="slidenum">' : '<a:r>';
 		var closeTag = isSlideNumber ? '</a:fld>' : '</a:r>';
 
@@ -3723,7 +3723,7 @@ var PptxGenJS = function(){
 		layoutDef = getLayoutByName(inSlide.layout);
 
 		if (layoutDef && layoutDef.hasSlideNumber) {
-			gObjPptxGenerators.addTextDefinition("0", {placeholderName: getPlaceholderName(layoutDef, 'sldNum')}, inSlide);
+			gObjPptxGenerators.addTextDefinition("0", {placeholderName: getPlaceholderName(layoutDef, 'slideNumber')}, inSlide);
 		}
 		// NEW End
 
@@ -4369,7 +4369,7 @@ var PptxGenJS = function(){
 		strXml += '<p:clrMap bg1="lt1" tx1="dk1" bg2="lt2" tx2="dk2" accent1="accent1" accent2="accent2" accent3="accent3" accent4="accent4" accent5="accent5" accent6="accent6" hlink="hlink" folHlink="folHlink" />'
 		strXml += '<p:sldLayoutIdLst>' + layoutDefs.join('') + '</p:sldLayoutIdLst>';
 
-		if (slideObject.placeholders.some(function(placeholder) {return 'sldNum' === placeholder.type})) {
+		if (slideObject.placeholders.some(function(placeholder) {return 'slideNumber' === placeholder.type})) {
 			// Manually added slide in PowerPoint (from layout with Slide Number) will have slide number
 			strXml += '<p:hf hdr="0" ftr="0" dt="0"/>';
 		}
