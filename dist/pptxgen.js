@@ -406,7 +406,7 @@ var PptxGenJS = function(){
 			}
 
 			target.data.push(resultObject);
-			createHyperlinkRels(text || '', target.rels);
+			createHyperlinkRels(resultObject || '', target.rels);
 
 			return resultObject;
 		},
@@ -2117,7 +2117,6 @@ var PptxGenJS = function(){
 
 	function createHyperlinkRels(inText, slideRels) {
 		var arrTextObjects = [];
-
 		// Only text objects can have hyperlinks, so return if this is plain text/number
 		if ( typeof inText === 'string' || typeof inText === 'number' ) return;
 		// IMPORTANT: Check for isArray before typeof=object, or we'll exhaust recursion!
@@ -2139,7 +2138,6 @@ var PptxGenJS = function(){
 						rId:  intRelId,
 						Target: decodeXmlEntities(text.options.hyperlink.url)
 					});
-
 					text.options.hyperlink.rId = intRelId;
 				}
 			}
