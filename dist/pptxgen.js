@@ -63,7 +63,7 @@ if ( NODEJS ) {
 var PptxGenJS = function(){
 	// CONSTANTS
 	var APP_VER = "1.8.0-beta";
-	var APP_REL = "20170913";
+	var APP_REL = "20170927";
 	//
 	var MASTER_OBJECTS = {
 		'chart': { name:'chart' },
@@ -351,12 +351,14 @@ var PptxGenJS = function(){
 			opt.lineSpacing = opt.lineSpacing || placeholder && placeholder.options.align;
 			opt.autoFit = opt.autoFit || placeholder && placeholder.options.autoFit;
 			opt.shadow = opt.shadow || placeholder && placeholder.options.shadow;
-			opt.autoFit = opt.autoFit || placeholder && placeholder.options.autoFit;
 			opt.lineSpacing = opt.lineSpacing || placeholder && placeholder.options.lineSpacing;
 			opt.inset = opt.inset || placeholder && placeholder.options.inset;
 
 			opt.line = opt.line || placeholder && placeholder.options.line;
 			opt.line_size = opt.line_size || placeholder && placeholder.options.line_size;
+
+			opt.horzOverflow = opt.horzOverflow || placeholder && placeholder.options.horzOverflow;
+			opt.vertOverflow = opt.vertOverflow || placeholder && placeholder.options.vertOverflow; 
 
 			// ROBUST: Convert attr values that will likely be passed by users to valid OOXML values
 			if ( opt.valign ) opt.valign = opt.valign.toLowerCase().replace(/^c.*/i,'ctr').replace(/^m.*/i,'ctr').replace(/^t.*/i,'t').replace(/^b.*/i,'b');
@@ -385,6 +387,22 @@ var PptxGenJS = function(){
 				resultObject.options.bodyProp.rIns = inch2Emu(opt.inset);
 				resultObject.options.bodyProp.tIns = inch2Emu(opt.inset);
 				resultObject.options.bodyProp.bIns = inch2Emu(opt.inset);
+			}
+
+			/**
+			 * Horizontal overflow
+			 * values: 'clip' or 'overflow' as a default
+			 */
+			if ( opt.horzOverflow && ( opt.horzOverflow == 'clip' || opt.horzOverflow == 'overflow' ) ) {
+				resultObject.options.bodyProp.horzOverflow = opt.horzOverflow;
+			}
+
+			/**
+			 * Vertical overflow
+			 * values: 'clip', 'ellipsis' or 'overflow' as a default
+			 */
+			if ( opt.vertOverflow && ( opt.vertOverflow == 'clip' || opt.vertOverflow == 'ellipsis' || opt.vertOverflow == 'overflow' ) ) {
+				resultObject.options.bodyProp.vertOverflow = opt.vertOverflow;
 			}
 
 			target.data.push(resultObject);
@@ -3432,11 +3450,15 @@ var PptxGenJS = function(){
 			if ( objOptions.bodyProp.rIns || objOptions.bodyProp.rIns == 0 ) bodyProperties += ' rIns="' + objOptions.bodyProp.rIns + '"';
 			if ( objOptions.bodyProp.tIns || objOptions.bodyProp.tIns == 0 ) bodyProperties += ' tIns="' + objOptions.bodyProp.tIns + '"';
 
-			// D: Close <a:bodyPr element
+			// D: Textbox overflow
+			if ( objOptions.bodyProp.horzOverflow ) bodyProperties += ' horzOverflow="' + objOptions.bodyProp.horzOverflow + '"';
+			if ( objOptions.bodyProp.vertOverflow ) bodyProperties += ' vertOverflow="' + objOptions.bodyProp.vertOverflow + '"';
+
+			// E: Close <a:bodyPr element
 			bodyProperties += '>';
 
-			// E: NEW: Add autofit type tags
-			if ( objOptions.shrinkText ) bodyProperties += '<a:normAutofit fontScale="85000" lnSpcReduction="20000" />'; // MS-PPT > Format Shape > Text Options: "Shrink text on overflow"
+			// F: NEW: Add autofit type tags
+			if ( objOptions.shrinkText ) bodyProperties += '<a:normAutofit />'; // MS-PPT > Format Shape > Text Options: "Shrink text on overflow"
 			// MS-PPT > Format Shape > Text Options: "Resize shape to fit text" [spAutoFit]
 			// NOTE: Use of '<a:noAutofit/>' in lieu of '' below causes issues in PPT-2013
 			bodyProperties += ( objOptions.bodyProp.autoFit !== false ? '<a:spAutoFit/>' : '' );
