@@ -3456,7 +3456,15 @@ var PptxGenJS = function(){
 			bodyProperties += '>';
 
 			// F: NEW: Add autofit type tags
-			if ( objOptions.shrinkText ) bodyProperties += '<a:normAutofit />'; // MS-PPT > Format Shape > Text Options: "Shrink text on overflow"
+			if ( objOptions.shrinkText ) {
+				var shrinkTextOptions = Object.keys(objOptions.shrinkText).reduce(function(acc, key) {
+					if (key == "fontScale" || key == "lnSpcReduction") {
+						acc += ' ' + key + '="' + objOptions.shrinkText[key] + '"';
+					}
+					return acc;
+				}, "");
+				bodyProperties += '<a:normAutofit' + shrinkTextOptions + ' />'; // MS-PPT > Format Shape > Text Options: "Shrink text on overflow"
+			}
 			// MS-PPT > Format Shape > Text Options: "Resize shape to fit text" [spAutoFit]
 			// NOTE: Use of '<a:noAutofit/>' in lieu of '' below causes issues in PPT-2013
 			bodyProperties += ( objOptions.bodyProp.autoFit !== false ? '<a:spAutoFit/>' : '' );

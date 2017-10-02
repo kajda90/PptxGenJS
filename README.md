@@ -486,36 +486,40 @@ slide.addText([ {text:'TEXT', options:{OPTIONS}} ]);
 ```
 
 ### Text Options
-| Option       | Type    | Unit    | Default   | Description         | Possible Values  |
-| :----------- | :------ | :------ | :-------- | :------------------ | :--------------- |
-| `x`          | number  | inches  | `1.0`     | horizontal location | 0-n OR 'n%'. (Ex: `{x:'50%'}` will place object in the middle of the Slide) |
-| `y`          | number  | inches  | `1.0`     | vertical location   | 0-n OR 'n%'. |
-| `w`          | number  | inches  |           | width               | 0-n OR 'n%'. (Ex: `{w:'50%'}` will make object 50% width of the Slide) |
-| `h`          | number  | inches  |           | height              | 0-n OR 'n%'. |
-| `align`      | string  |         | `left`    | alignment           | `left` or `center` or `right` |
-| `autoFit`    | boolean |         | `false`   | "Fit to Shape"      | `true` or `false` |
-| `bold`       | boolean |         | `false`   | bold text           | `true` or `false` |
-| `breakLine`  | boolean |         | `false`   | appends a line break | `true` or `false` (only applies when used in text object options) Ex: `{text:'hi', options:{breakLine:true}}` |
-| `bullet`     | boolean |         | `false`   | bulleted text       | `true` or `false` |
-| `bullet`     | object  |         |           | bullet options (number type or choose any unicode char) | object with `type` or `code`. Ex: `bullet:{type:'number'}`. Ex: `bullet:{code:'2605'}` |
-| `color`      | string  |         |           | text color          | hex color code, [scheme color constant](#scheme-colors) or [gradient](#gradients). Ex: `{ color:'0088CC' }` |
-| `fill`       | string  |         |           | fill/bkgd color     | hex color code, [scheme color constant](#scheme-colors) or [gradient](#gradients). Ex: `{ color:'0088CC' }` |
-| `font_face`  | string  |         |           | font face           | Ex: 'Arial' |
-| `font_size`  | number  | points  |           | font size           | 1-256. Ex: `{ font_size:12 }` |
-| `hyperlink`  | string  |         |           | add hyperlink       | object with `url` and optionally `tooltip`. Ex: `{ hyperlink:{url:'https://github.com'} }` |
-| `indentLevel` | number  | level  | `0`       | bullet indent level | 1-32. Ex: `{ indentLevel:1 }` |
-| `inset`      | number  | inches  |           | inset/padding       | 1-256. Ex: `{ inset:1.25 }` |
-| `isTextBox`  | boolean |         | `false`   | PPT "Textbox"       | `true` or `false` |
-| `italic`     | boolean |         | `false`   | italic text         | `true` or `false` |
-| `lineSpacing`| number  | points  |           | line spacing points | 1-256. Ex: `{ lineSpacing:28 }` |
-| `margin`     | number  | points  |           | margin              | 0-99 (ProTip: use the same value from CSS `padding`) |
-| `rectRadius` | number  | inches  |           | rounding radius     | rounding radius for `ROUNDED_RECTANGLE` text shapes |
-| `rtlMode`    | boolean |         | `false`   | enable Right-to-Left mode | `true` or `false` |
-| `shadow`     | object  |         |           | text shadow options | see options below. Ex: `shadow:{ type:'outer' }` |
-| `subscript`  | boolean |         | `false`   | subscript text      | `true` or `false` |
-| `superscript`| boolean |         | `false`   | superscript text    | `true` or `false` |
-| `underline`  | boolean |         | `false`   | underline text      | `true` or `false` |
-| `valign`     | string  |         |           | vertical alignment  | `top` or `middle` or `bottom` |
+| Option         | Type    | Unit    | Default   |  Description         | Possible Values  |
+| :------------- | :------ | :------ | :--------- | :------------------ | :--------------- |
+| `x`            | number  | inches  | `1.0`      | horizontal location | 0-n OR 'n%'. (Ex: `{x:'50%'}` will place object in the middle of the Slide) |
+| `y`            | number  | inches  | `1.0`      | vertical location   | 0-n OR 'n%'. |
+| `w`            | number  | inches  |            | width               | 0-n OR 'n%'. (Ex: `{w:'50%'}` will make object 50% width of the Slide) |
+| `h`            | number  | inches  |            | height              | 0-n OR 'n%'. |
+| `align`        | string  |         | `left`     | alignment           | `left` or `center` or `right` |
+| `autoFit`      | boolean |         | `false`    | "Fit to Shape"      | `true` or `false` |
+| `bold`         | boolean |         | `false`    | bold text           | `true` or `false` |
+| `breakLine`    | boolean |         | `false`    | appends a line break | `true` or `false` (only applies when used in text object options) Ex: `{text:'hi', options:{breakLine:true}}` |
+| `bullet`       | boolean |         | `false`    | bulleted text       | `true` or `false` |
+| `bullet`       | object  |         |            | bullet options (number type or choose any unicode char) | object with `type` or `code`. Ex: `bullet:{type:'number'}`. Ex: `bullet:{code:'2605'}` |
+| `color`        | string  |         |            | text color          | hex color code, [scheme color constant](#scheme-colors) or [gradient](#gradients). Ex: `{ color:'0088CC' }` |
+| `fill`         | string  |         |            | fill/bkgd color     | hex color code, [scheme color constant](#scheme-colors) or [gradient](#gradients). Ex: `{ color:'0088CC' }` |
+| `font_face`    | string  |         |            | font face           | Ex: 'Arial' |
+| `font_size`    | number  | points  |            | font size           | 1-256. Ex: `{ font_size:12 }` |
+| `hyperlink`    | string  |         |            | add hyperlink       | object with `url` and optionally `tooltip`. Ex: `{ hyperlink:{url:'https://github.com'} }` |
+| `indentLevel`  | number  | level  | `0`         | bullet indent level | 1-32. Ex: `{ indentLevel:1 }` |
+| `inset`        | number  | inches  |            | inset/padding       | 1-256. Ex: `{ inset:1.25 }` |
+| `isTextBox`    | boolean |         | `false`    | PPT "Textbox"       | `true` or `false` |
+| `italic`       | boolean |         | `false`    | italic text         | `true` or `false` |
+| `lineSpacing`. | number  | points  |            | line spacing points | 1-256. Ex: `{ lineSpacing:28 }` |
+| `margin`       | number  | points  |            | margin              | 0-99 (ProTip: use the same value from CSS `padding`) |
+| `rectRadius`   | number  | inches  |            | rounding radius     | rounding radius for `ROUNDED_RECTANGLE` text shapes |
+| `rtlMode`      | boolean |         | `false`    | enable Right-to-Left mode | `true` or `false` |
+| `shadow`       | object  |         |            | text shadow options | see options below. Ex: `shadow:{ type:'outer' }` |
+| `subscript`    | boolean |         | `false`    | subscript text      | `true` or `false` |
+| `superscript`  | boolean |         | `false`    | superscript text    | `true` or `false` |
+| `underline`    | boolean |         | `false`    | underline text      | `true` or `false` |
+| `valign`       | string  |         |            | vertical alignment  | `top` or `middle` or `bottom` |
+| `shrinkText`   | boolean |         |            | shrink text on overflow | `true` or `false`
+| `shrinkText`   | object  |         |            | shrink text options | object with `fontScale` or `lnSpcReduction` percentage values. Ex: `{fontScale: 100%, lnSpcReduction: 0%}` |
+| `horzOverflow` | string  |         | `overflow` | horizontal overflow | `clip` to clip the text at the horizonal overflow or `overflow` allow horizontal overflow |
+| `vertOverflow` | string  |         | `overflow` | vertical overflow   | `clip` to clip the text at the vertical overflow, `ellipsis` to use an ellipsis to denote that there is text which is not visible or `overflow` allow vertical overflow |
 
 ### Text Shadow Options
 | Option       | Type    | Unit    | Default   | Description         | Possible Values                          |
@@ -526,6 +530,15 @@ slide.addText([ {text:'TEXT', options:{OPTIONS}} ]);
 | `color`      | string  |         |           | text color          | hex color code, [scheme color constant](#scheme-colors). Ex: `{ color:'0088CC' }` |
 | `offset`     | number  | points  |           | offset size         | 1-256. Ex: `{ offset:8 }`                |
 | `opacity`    | number  | percent |           | opacity             | 0-1. Ex: `opacity:0.75`                  |
+
+### Shrink Text
+| Option           | Type    | Unit    | Default    | Description                                                               | Possible Values                     |
+| :--------------- | :------ | :------ | :--------- | :------------------------------------------------------------------------ | :---------------------------------- |
+| `fontScale`      | string  | percent | `100%`    | percentage of the original font size to which the text is scaled          | 0-100. Ex: `{ fontScale: 100% }`    |
+| `lnSpcReduction` | string  | percent | `0%`      | percentage amount by which the line spacing of each paragraphs is reduced | 0-100. Ex: `{ lnSpcReduction: 0% }` |
+
+NOTES:
+* If the value is omitted, it is assumed to be `100%` for option `fontScale` or `0%` for `lnSpcReduction` (see the table above)
 
 ### Text Examples
 ```javascript
