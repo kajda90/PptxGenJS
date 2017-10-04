@@ -1565,7 +1565,7 @@ var PptxGenJS = function(){
 			if (typeof(colorOpts) === "string") {
 				return gObjPptxGenerators.solidFillToXml(colorOpts, innerElements, stripEnclosingTag);
 			}
-			else if (colorOpts.gradient) {
+			else if (colorOpts instanceof Object && colorOpts.gradient) {
 				return gObjPptxGenerators.gradientFillToXml(colorOpts, innerElements);
 			}
 			throw new Error('Unexpected color property value.')
