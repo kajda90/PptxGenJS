@@ -398,23 +398,23 @@ slide.addChart({TYPE}, {DATA}, {OPTIONS});
 | `valGridLine`          | object  |         |              | value grid line style        | object with properties `size` (pt), `color` and `style` (`'solid'`, `'dash'` or `'dot'`) or `'none'` to hide |
 
 ### Chart Data Options
-| Option                 | Type    | Unit    | Default   | Description                | Possible Values                            |
-| :--------------------- | :------ | :------ | :-------- | :------------------------- | :----------------------------------------- |
-| `barDir`               | string  |         | `col`     | bar direction        | (*Bar Chart*) `bar` (horizontal) or `col` (vertical). Ex: `{barDir:'bar'}` |
-| `barGapWidthPct`       | number  | percent | `150`     | width % between bar groups | (*Bar Chart*) 0-999. Ex: `{ barGapWidthPct:50 }` |
-| `barGrouping`          | string  |         |`clustered`| bar grouping               | (*Bar Chart*) `clustered` or `stacked` or `percentStacked`. |
-| `dataBorder`           | object  |         |           | data border                | object with `pt`, `opacity`, and `color` values. Ex: `border:{pt:'1', color:'f1f1f1', opacity: 25}` (for Area chart, `color` isnot effective and derives from colorset to correspond with the fill |
-| `dataLabelColor`       | string  |         | `000000`  | data label color           | hex color code. Ex: `{ dataLabelColor:'0088CC' }`     |
-| `dataLabelFormatCode`  | string  |         |           | format to show data value  | format string. Ex: `{ dataLabelFormatCode:'#,##0' }` [MicroSoft Number Format Codes](https://support.office.com/en-us/article/Number-format-codes-5026bbd6-04bc-48cd-bf33-80f18b4eae68)  |
-| `dataLabelFontFace`    | string  |         | `Arial`   | value-axis font face       | font name. Ex: `{ titleFontFace:'Arial' }`   |
-| `dataLabelFontSize`    | number  | points  | `18`      | value-axis font size       | 1-256. Ex: `{ titleFontSize:12 }`            |
-| `dataLabelPosition`    | string  |         | `bestFit` | data label position        | `bestFit`,`b`,`ctr`,`inBase`,`inEnd`,`l`,`outEnd`,`r`,`t` |
-| `gridLineColor`        | string  |         | `000000`  | grid line color            | hex color code. Ex: `{ gridLineColor:'0088CC' }`     |
-| `lineDataSymbol`       | string  |         | `circle`  | symbol used on line marker | `circle`,`dash`,`diamond`,`dot`,`none`,`square`,`triangle` |
-| `lineDataSymbolSize`   | number  | points  | `6`       | size of line data symbol   | 1-256. Ex: `{ lineDataSymbolSize:12 }` |
-| `lineShadow`           | object  |         |           | data line shadow options   | `'none'` or [shadow options](#chart-line-shadow-options) |
-| `lineSize`             | number  | points  | `2`       | thickness of data line     | 1 and more. Ex: `{ lineSize: 1 }` |
-| `valueBarColors`       | boolean |         | `false`   | forces chartColors on multi-data-series | `true` or `false` |
+| Option                   | Type    | Unit    | Default   | Description                | Possible Values                            |
+| :----------------------- | :------ | :------ | :-------- | :------------------------- | :----------------------------------------- |
+| `barDir`                 | string  |         | `col`     | bar direction        | (*Bar Chart*) `bar` (horizontal) or `col` (vertical). Ex: `{barDir:'bar'}` |
+| `barGapWidthPct`         | number  | percent | `150`     | width % between bar groups | (*Bar Chart*) 0-999. Ex: `{ barGapWidthPct:50 }` |
+| `barGrouping`            | string  |         |`clustered`| bar grouping               | (*Bar Chart*) `clustered` or `stacked` or `percentStacked`. |
+| `dataBorder`             | object  |         |           | data border                | object with `pt`, `opacity`, and `color` values. Ex: `border:{pt:'1', color:'f1f1f1', opacity: 25}` (for Area chart, `color` isnot effective and derives from colorset to correspond with the fill |
+| `dataLabelColor`         | string  |         | `000000`  | data label color           | hex color code. Ex: `{ dataLabelColor:'0088CC' }`     |
+| `dataLabelFormatCode`    | string  |         |           | format to show data value  | format string. Ex: `{ dataLabelFormatCode:'#,##0' }` [MicroSoft Number Format Codes](https://support.office.com/en-us/article/Number-format-codes-5026bbd6-04bc-48cd-bf33-80f18b4eae68)  |
+| `dataLabelFontFace`      | string  |         | `Arial`   | value-axis font face       | font name. Ex: `{ titleFontFace:'Arial' }`   |
+| `dataLabelFontSize`      | number  | points  | `18`      | value-axis font size       | 1-256. Ex: `{ titleFontSize:12 }`            |
+| `dataLabelPosition`      | string  |         | `bestFit` | data label position        | `bestFit`,`b`,`ctr`,`inBase`,`inEnd`,`l`,`outEnd`,`r`,`t` |
+| `gridLineColor`          | string  |         | `000000`  | grid line color            | hex color code. Ex: `{ gridLineColor:'0088CC' }`     |
+| `lineDataSymbol`         | string  |         | `circle`  | symbol used on line marker | `circle`,`dash`,`diamond`,`dot`,`none`,`square`,`triangle` |
+| `lineDataSymbolSize`     | number  | points  | `6`       | size of line data symbol   | 1-256. Ex: `{ lineDataSymbolSize:12 }` |
+| `shadow` or `lineShadow` | object  |         |           | data shadow options        | `'none'` or [shadow options](#chart-line-shadow-options). Please use `shadow`, `lineShadow` is there only for backward compatibility. |
+| `lineSize`               | number  | points  | `2`       | thickness of data line     | 1 and more. Ex: `{ lineSize: 1 }` |
+| `valueBarColors`        |  boolean |         | `false`   | forces chartColors on multi-data-series | `true` or `false` |
 
 ### Chart Line Shadow Options
 | Option       | Type    | Unit    | Default   | Description         | Possible Values                            |

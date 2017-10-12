@@ -121,7 +121,7 @@ var PptxGenJS = function(){
 	var DEF_FONT_TITLE_SIZE = 18;
 	var DEF_SLIDE_MARGIN_IN = [0.5, 0.5, 0.5, 0.5]; // TRBL-style
 	var DEF_CHART_GRIDLINE = { color: "888888", style: "solid", size: 1 };
-	var DEF_LINE_SHADOW = { type: 'outer', blur: 3, offset: (23000 / 12700), angle: 90, color: '000000', opacity: 0.35, rotateWithShape: true };
+	var DEF_CHART_SHADOW = { type: 'outer', blur: 3, offset: (23000 / ONEPT), angle: 90, color: '000000', opacity: 0.35, rotateWithShape: true };
 	var DEF_TEXT_SHADOW = { type: 'outer', blur: 8, offset: 4, angle: 270, color: '000000', opacity: 0.75 };
 	var DEF_EMPTY_LAYOUT = {
 		slide: {},
@@ -2390,7 +2390,7 @@ var PptxGenJS = function(){
 	 * @see http://officeopenxml.com/drwSp-effects.php
 	 */
 	function createShadowElement(opts, defaults) {
-		if ('none' === opts) {
+		if (!opts || 'none' === opts) {
 			return '<a:effectLst />';
 		}
 
@@ -2709,7 +2709,7 @@ var PptxGenJS = function(){
 						var color = rel.opts.type === 'area' ? strSerColor : rel.opts.dataBorder.color;
 						strXml += '<a:ln w="'+ (rel.opts.dataBorder.pt * ONEPT) +'" cap="flat">'+ gObjPptxGenerators.colorToXml(color, '<a:alpha val="' + (rel.opts.dataBorder.opacity * 1000) + '"/>') +'<a:prstDash val="solid"/><a:round/></a:ln>';
 					}
-					strXml += createShadowElement(rel.opts.lineShadow || 'none', DEF_LINE_SHADOW);
+					strXml += createShadowElement(rel.opts.shadow || rel.opts.lineShadow || 'none', DEF_CHART_SHADOW);
 					strXml += '  </c:spPr>';
 
 					// LINE CHART ONLY: `marker`
@@ -2720,7 +2720,7 @@ var PptxGenJS = function(){
 						strXml += '  <c:spPr>';
 	  					strXml += gObjPptxGenerators.colorToXml(rel.opts.chartColors[(idx+1 > rel.opts.chartColors.length ? (Math.floor(Math.random() * rel.opts.chartColors.length)) : idx)]);
 						strXml += '    <a:ln w="9525" cap="flat">'+ gObjPptxGenerators.colorToXml(strSerColor) +'<a:prstDash val="solid"/><a:round/></a:ln>';
-						strXml += 	   createShadowElement(rel.opts.lineShadow || 'none', DEF_LINE_SHADOW);
+						strXml += 	   createShadowElement(rel.opts.shadow || rel.opts.lineShadow || 'none', DEF_CHART_SHADOW);
 						strXml += '  </c:spPr>';
 						strXml += '</c:marker>';
 					}
@@ -2738,7 +2738,7 @@ var PptxGenJS = function(){
 							strXml += '    	<c:bubble3D val="0"/>';
 							strXml += '    	<c:spPr>';
 							strXml +=       gObjPptxGenerators.colorToXml(colors[index % colors.length]);
-							strXml += 	   createShadowElement(rel.opts.lineShadow || 'none', DEF_LINE_SHADOW);
+							strXml += 	   createShadowElement(rel.opts.shadow || rel.opts.lineShadow || 'none', DEF_CHART_SHADOW);
 							strXml += '    </c:spPr>';
 							strXml += '  </c:dPt>';
 						});
@@ -2885,8 +2885,8 @@ var PptxGenJS = function(){
 					strXml += '  <c:axId val="2094734553"/>';
 					strXml += '  <c:scaling>';
 					strXml += '    <c:orientation val="'+ (rel.opts.valAxisOrientation || (rel.opts.barDir == 'col' ? 'minMax' : 'minMax')) +'"/>';
-					if (rel.opts.valAxisMaxVal || rel.opts.valAxisMaxVal === 0) strXml += '<c:max val="'+ rel.opts.valAxisMaxVal +'"/>';
-					if (rel.opts.valAxisMinVal || rel.opts.valAxisMinVal === 0) strXml += '<c:min val="'+ rel.opts.valAxisMinVal +'"/>';
+					if (rel.opts.valAxisMaxVal) strXml += '<c:max val="'+ rel.opts.valAxisMaxVal +'"/>';
+					if (rel.opts.valAxisMinVal) strXml += '<c:min val="'+ rel.opts.valAxisMinVal +'"/>';
 					strXml += '  </c:scaling>';
 					strXml += '  <c:delete val="'+ (rel.opts.valAxisHidden ? 1 : 0) +'"/>';
 					strXml += '  <c:axPos val="'+ (rel.opts.barDir == 'col' ? 'l' : 'b') +'"/>';
@@ -2962,11 +2962,7 @@ var PptxGenJS = function(){
 				strXml += '  <c:spPr>';
 				strXml += '    <a:solidFill><a:schemeClr val="accent1"/></a:solidFill>';
 				strXml += '    <a:ln w="9525" cap="flat"><a:solidFill><a:srgbClr val="F9F9F9"/></a:solidFill><a:prstDash val="solid"/><a:round/></a:ln>';
-				strXml += '    <a:effectLst>';
-				strXml += '      <a:outerShdw sx="100000" sy="100000" kx="0" ky="0" algn="tl" rotWithShape="1" blurRad="38100" dist="23000" dir="5400000">';
-				strXml += '        <a:srgbClr val="000000"><a:alpha val="35000"/></a:srgbClr>';
-				strXml += '      </a:outerShdw>';
-				strXml += '    </a:effectLst>';
+				strXml += createShadowElement(rel.opts.shadow || rel.opts.lineShadow || 'none', DEF_CHART_SHADOW);
 				strXml += '  </c:spPr>';
 				strXml += '<c:explosion val="0"/>';
 
@@ -2980,11 +2976,7 @@ var PptxGenJS = function(){
 					if ( rel.opts.dataBorder ) {
 						strXml += '<a:ln w="'+ (rel.opts.dataBorder.pt * ONEPT) +'" cap="flat">'+ gObjPptxGenerators.colorToXml(rel.opts.dataBorder.color) +'<a:prstDash val="solid"/><a:round/></a:ln>';
 					}
-					strXml += '    <a:effectLst>';
-					strXml += '      <a:outerShdw sx="100000" sy="100000" kx="0" ky="0" algn="tl" rotWithShape="1" blurRad="38100" dist="23000" dir="5400000">';
-					strXml += '        <a:srgbClr val="000000"><a:alpha val="35000"/></a:srgbClr>';
-					strXml += '      </a:outerShdw>';
-					strXml += '    </a:effectLst>';
+					strXml += createShadowElement(rel.opts.shadow || rel.opts.lineShadow || 'none', DEF_CHART_SHADOW);
 					strXml += '  </c:spPr>';
 					strXml += '</c:dPt>';
 				});
