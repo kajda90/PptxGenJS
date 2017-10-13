@@ -2885,8 +2885,8 @@ var PptxGenJS = function(){
 					strXml += '  <c:axId val="2094734553"/>';
 					strXml += '  <c:scaling>';
 					strXml += '    <c:orientation val="'+ (rel.opts.valAxisOrientation || (rel.opts.barDir == 'col' ? 'minMax' : 'minMax')) +'"/>';
-					if (rel.opts.valAxisMaxVal) strXml += '<c:max val="'+ rel.opts.valAxisMaxVal +'"/>';
-					if (rel.opts.valAxisMinVal) strXml += '<c:min val="'+ rel.opts.valAxisMinVal +'"/>';
+					if (rel.opts.valAxisMaxVal || rel.opts.valAxisMaxVal === 0) strXml += '<c:max val="'+ rel.opts.valAxisMaxVal +'"/>';
+					if (rel.opts.valAxisMinVal || rel.opts.valAxisMinVal === 0) strXml += '<c:min val="'+ rel.opts.valAxisMinVal +'"/>';
 					strXml += '  </c:scaling>';
 					strXml += '  <c:delete val="'+ (rel.opts.valAxisHidden ? 1 : 0) +'"/>';
 					strXml += '  <c:axPos val="'+ (rel.opts.barDir == 'col' ? 'l' : 'b') +'"/>';
