@@ -63,7 +63,7 @@ if ( NODEJS ) {
 var PptxGenJS = function(){
 	// CONSTANTS
 	var APP_VER = "1.8.0-beta";
-	var APP_REL = "20170927";
+	var APP_REL = "20171013";
 	//
 	var MASTER_OBJECTS = {
 		'chart': { name:'chart' },
@@ -134,7 +134,6 @@ var PptxGenJS = function(){
 	var DEF_COLOR_THEME = { dk1: '000000', lt1: 'FFFFFF', dk2: 'A7A7A7', lt2: '535353', accent1: '4F81BD', accent2: 'C0504D', accent3: '9BBB59', accent4: '8064A2', accent5: '4BACC6', accent6: 'F79646', hlink: '0000FF', folHlink: 'FF00FF' };
 	var LAYOUT_IDX_SERIES_BASE = 2147483649;
 
-	// NEW Start
 	var PLACEHOLDERS = {
 		title: {
 			type: 'title',
@@ -236,7 +235,6 @@ var PptxGenJS = function(){
 		PLACEHOLDERS['slideNumber'].type,
 		PLACEHOLDERS['date'].type,
 	]
-	// New End
 
 	// A: Create internal pptx object
 	var gObjPptx = {};
@@ -333,14 +331,12 @@ var PptxGenJS = function(){
 			var text = ( text || '' );
 			if ( Array.isArray(text) && text.length == 0 ) text = '';
 
-			// NEW Start
 			// NOTE: If placeholder is assigned some properties will be inherited from its options
 			// ..... These properties will be iherited: 'color', 'valign', 'align', 'lineSpacing' and 'autoFit' and 'shadow'
 			var placeholder = null;
 			if (opt.placeholderName) {
 				placeholder = getPlaceholder(opt.placeholderName, getLayoutIdxForSlide(target.numb));
 			}
-			// NEW End
 
 			// STEP 2: Set some options
 			// Set color (options > inherit from placeholder > inherit from Slide > default from master slide)
@@ -738,7 +734,6 @@ var PptxGenJS = function(){
 				target.slideNumberObj = slideDef.slideNumber;
 			};
 
-			// New Start
 			// Add Slide Placeholders
 			var usedPlaceholderTypes = [];
 			if (slideDef.placeholders && Array.isArray(slideDef.placeholders) && slideDef.placeholders.length > 0) {
@@ -790,7 +785,6 @@ var PptxGenJS = function(){
 					}
 				});
 			}
-			// NEW End
 		},
 
 		/**
@@ -1302,7 +1296,6 @@ var PptxGenJS = function(){
 				strSlideXml += '</p:sp>';
 			}
 
-			// NEW Start
 			slideObject.placeholders.forEach(function(placeholderObj, idx) {
 				let x = 0,
 					y = 0,
@@ -1389,7 +1382,6 @@ var PptxGenJS = function(){
 				strSlideXml += '  </p:txBody>';
 				strSlideXml += '</p:sp>';
 			});
-			// NEW End
 
 			// STEP 6: Close spTree and finalize slide XML
 			strSlideXml += '</p:spTree>';
@@ -2528,7 +2520,6 @@ var PptxGenJS = function(){
 		});
 	}
 
-	// NEW Start
 	/**
 	 * @param {String} Name of placeholder defined in concrete layout object
 	 * @param {Number} Index of layout
@@ -2560,7 +2551,6 @@ var PptxGenJS = function(){
 
 		return placeholder;
 	};
-	// NEW End
 
 	/* =======================================================================================================
 	|
@@ -2638,17 +2628,7 @@ var PptxGenJS = function(){
 		strXml += '<c:plotArea>';
 		// IMPORTANT: Dont specify layout to enable auto-fit: PPT does a great job maximizing space with all 4 TRBL locations
 		if ( rel.opts.layout ) {
-			strXml += '<c:layout>';
-			strXml += ' <c:manualLayout>';
-			strXml += '  <c:layoutTarget val="inner" />';
-			strXml += '  <c:xMode val="edge" />';
-			strXml += '  <c:yMode val="edge" />';
-			strXml += '  <c:x val="' + (rel.opts.layout.x || 0) + '" />';
-			strXml += '  <c:y val="' + (rel.opts.layout.y || 0) + '" />';
-			strXml += '  <c:w val="' + (rel.opts.layout.w || 1) + '" />';
-			strXml += '  <c:h val="' + (rel.opts.layout.h || 1) + '" />';
-			strXml += ' </c:manualLayout>';
-			strXml += '</c:layout>';
+			strXml += genManualLayout(rel.opts.layout, 'inner')
 		}
 		else {
 			strXml += '<c:layout/>';
@@ -3081,7 +3061,11 @@ var PptxGenJS = function(){
 			if ( rel.opts.showLegend ) {
 				strXml += '<c:legend>';
 				strXml += '<c:legendPos val="' + rel.opts.legendPos + '"/>';
-				strXml += '<c:layout/>';
+				if (rel.opts.legendLayout) {
+					strXml += genManualLayout(rel.opts.legendLayout);
+				} else {
+					strXml += '<c:layout/>';
+				}
 				strXml += '<c:overlay val="0"/>';
 				if(rel.opts.legendFontSize){
 					strXml += '<c:txPr>';
@@ -3507,7 +3491,6 @@ var PptxGenJS = function(){
 		return outText;
 	}
 
-	// NEW Start
 	// NOTE: Chart and table don't inherit properties automatically from theirs placeholder
 	// NOTE: If exist properties from placeholder, function will return empty string
 	// otherwise default properties. Chart and table always need some properties (due to note #1).
@@ -3546,9 +3529,7 @@ var PptxGenJS = function(){
 
 		return strXml;
 	};
-	// NEW End
 
-	// NEW Start
 	// Get right value for align based on user input
 	// @param {string} attribute
 	// @param {string} align
@@ -3589,7 +3570,26 @@ var PptxGenJS = function(){
 		}
 		return align.length ? ' ' + attribute + '="' + align + '"' : align;
 	}
-	// NEW End
+
+	function genManualLayout(opts, layoutTarget) {
+		var strXml = '';
+		strXml += '<c:layout>';
+		strXml += ' <c:manualLayout>';
+
+		if (layoutTarget == 'outer' || layoutTarget == 'inner') {
+			strXml += '  <c:layoutTarget val="' + layoutTarget + '" />';
+		}
+
+		strXml += '  <c:xMode val="edge" />';
+		strXml += '  <c:yMode val="edge" />';
+		strXml += '  <c:x val="' + (opts.x || 0) + '" />';
+		strXml += '  <c:y val="' + (opts.y || 0) + '" />';
+		strXml += '  <c:w val="' + (opts.w || 1) + '" />';
+		strXml += '  <c:h val="' + (opts.h || 1) + '" />';
+		strXml += ' </c:manualLayout>';
+		strXml += '</c:layout>';
+		return strXml;
+	}
 
 	// XML-GEN: First 6 functions create the base /ppt files
 
@@ -3786,11 +3786,9 @@ var PptxGenJS = function(){
 			var x = 0, y = 0, cx = getSmartParseNumber('75%','X'), cy = 0;
 			var locationAttr = "", shapeType = null, placeholder = null;
 
-			// NEW Start
 			if (slideObj.options.placeholderName && layoutIdx) {
 				placeholder = getPlaceholder(slideObj.options.placeholderName, layoutIdx);
 			}
-			// NEW End
 
 			// A: Set option vars
 			slideObj.options = slideObj.options || {};
@@ -4101,7 +4099,6 @@ var PptxGenJS = function(){
 					// B: The addition of the "txBox" attribute is the sole determiner of if an object is a Shape or Textbox
 					strSlideXml += '<p:nvSpPr><p:cNvPr id="' + (idx + 2) + '" name="Object ' + (idx + 1) + '"/>';
 					if (placeholder) {
-						// NEW Start
 						strSlideXml += '<p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr>';
 						strSlideXml += '<p:nvPr><p:ph' + (PLACEHOLDERS_WITHOUT_IDX.indexOf(placeholder.type) == -1 ? ' idx="' + placeholder.idx + '"' : '') + (placeholder.objectType != null ? ' type="' + placeholder.objectType + '"' : '') + '/></p:nvPr>';
 						strSlideXml += '</p:nvSpPr>';
@@ -4109,7 +4106,6 @@ var PptxGenJS = function(){
 
 						slideObj.options.placeholder = placeholder  // keep reference for genXmlTextBody
 						strSlideXml += getXmlTransform(slideObj, locationAttr, x, y, cx, cy, placeholder);
-						// NEW End
 					} else {
 						strSlideXml += '<p:cNvSpPr' + ((slideObj.options && slideObj.options.isTextBox) ? ' txBox="1"/><p:nvPr/>' : '/><p:nvPr/>');
 						strSlideXml += '</p:nvSpPr>';
@@ -4799,9 +4795,7 @@ var PptxGenJS = function(){
 			var strType  = (opt.type || "audio");
 			var strExtn  = "mp3";
 
-			// NEW Start
 			var placeholderName = (opt.placeholderName || null);
-			// NEW End
 
 			// STEP 1: REALITY-CHECK
 			if ( !strPath && !strData && strType != 'online' ) {
