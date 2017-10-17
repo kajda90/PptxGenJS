@@ -2682,7 +2682,7 @@ var PptxGenJS = function(){
 					}
 					if ( rel.opts.type == 'line') {
 						strXml += '<a:ln w="'+ (rel.opts.lineSize * ONEPT) +'" cap="flat">' + gObjPptxGenerators.colorToXml(strSerColor);
-						strXml += '<a:prstDash val="' + (rel.opts.line_dash || (obj.style && obj.style.lineStyle) || "solid") + '"/><a:round/></a:ln>';
+						strXml += '<a:prstDash val="' + ((obj.style && obj.style.lineStyle) || rel.opts.line_dash || "solid") + '"/><a:round/></a:ln>';
 					}
 					else if ( rel.opts.dataBorder ) {
 						var color = rel.opts.type === 'area' ? strSerColor : rel.opts.dataBorder.color;
