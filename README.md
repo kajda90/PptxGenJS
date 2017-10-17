@@ -51,6 +51,7 @@ Quickly and easily create PowerPoint presentations with a few simple JavaScript 
     - [Chart Axis Options](#chart-axis-options)
     - [Chart Data Options](#chart-data-options)
     - [Chart Line Shadow Options](#chart-line-shadow-options)
+    - [Chart Data Object](#chart-data-object)
     - [Chart Examples](#chart-examples)
   - [Adding Text](#adding-text)
     - [Text Options](#text-options)
@@ -426,6 +427,14 @@ slide.addChart({TYPE}, {DATA}, {OPTIONS});
 | `color`      | string  |         | `000000`  | line color          | hex color code. Ex: `{ color:'0088CC' }`   |
 | `offset`     | number  | points  | `1.8`     | offset size         | 1-256. Ex: `{ offset:2 }`                  |
 | `opacity`    | number  | percent | `0.35`    | opacity             | 0-1. Ex: `{ opacity:0.35 }`                |
+
+### Chart data object
+| Option       | Type      | Description
+| :----------- | :-------- | :------------------
+| `values`     | number[]  | y-values
+| `labels`     | string[]  | data labels
+| `name`       | string    | series name
+| `style`      | object    | particular style, currently supports `lineStyle: (dot|dash|solid|none)`
 
 ### Chart Examples
 ```javascript
