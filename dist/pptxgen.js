@@ -2628,7 +2628,7 @@ var PptxGenJS = function(){
 		strXml += '<c:plotArea>';
 		// IMPORTANT: Dont specify layout to enable auto-fit: PPT does a great job maximizing space with all 4 TRBL locations
 		if ( rel.opts.layout ) {
-			strXml += genManualLayout(rel.opts.layout, 'inner')
+			strXml += genManualLayout(rel.opts.layout, rel.opts.layout.layoutTarget || 'inner')
 		}
 		else {
 			strXml += '<c:layout/>';
@@ -2795,7 +2795,8 @@ var PptxGenJS = function(){
 							fontSize: rel.opts.catAxisTitleFontSize,
 							color: rel.opts.catAxisTitleColor,
 							fontFace: rel.opts.catAxisTitleFontFace,
-							rotate: rel.opts.catAxisTitleRotate
+							rotate: rel.opts.catAxisTitleRotate,
+							layout: rel.opts.catAxisTitleLayout
 						});
 					}
 					strXml += '  <c:axId val="2094734552"/>';
@@ -2858,7 +2859,8 @@ var PptxGenJS = function(){
 							fontSize: rel.opts.valAxisTitleFontSize,
 							color: rel.opts.valAxisTitleColor,
 							fontFace: rel.opts.valAxisTitleFontFace,
-							rotate: rel.opts.valAxisTitleRotate
+							rotate: rel.opts.valAxisTitleRotate,
+							layout: rel.opts.valAxisTitleLayout
 						});
 					}
 					strXml += '  <c:axId val="2094734553"/>';
@@ -3147,7 +3149,11 @@ var PptxGenJS = function(){
 		strXml += '  </a:p>';
 		strXml += '  </c:rich>';
 		strXml += ' </c:tx>';
-		strXml += ' <c:layout/>';
+		if(opts.layout) {
+			strXml += genManualLayout(opts.layout);
+		} else {
+			strXml += ' <c:layout/>';
+		}
 		strXml += ' <c:overlay val="0"/>';
 		strXml += '</c:title>';
 		return strXml;
@@ -3583,8 +3589,12 @@ var PptxGenJS = function(){
 		strXml += '  <c:yMode val="edge" />';
 		strXml += '  <c:x val="' + (opts.x || 0) + '" />';
 		strXml += '  <c:y val="' + (opts.y || 0) + '" />';
-		strXml += '  <c:w val="' + (opts.w || 1) + '" />';
-		strXml += '  <c:h val="' + (opts.h || 1) + '" />';
+		if (typeof opts.w == 'number') {
+			strXml += '  <c:w val="' + (opts.w || 1) + '" />';
+		}
+		if (typeof opts.h == 'number') {
+			strXml += '  <c:h val="' + (opts.h || 1) + '" />';
+		}
 		strXml += ' </c:manualLayout>';
 		strXml += '</c:layout>';
 		return strXml;
