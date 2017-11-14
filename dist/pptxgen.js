@@ -63,7 +63,7 @@ if ( NODEJS ) {
 var PptxGenJS = function(){
 	// CONSTANTS
 	var APP_VER = "1.8.0-beta";
-	var APP_REL = "20171013";
+	var APP_REL = "20171114";
 	//
 	var MASTER_OBJECTS = {
 		'chart': { name:'chart' },
@@ -1749,15 +1749,17 @@ var PptxGenJS = function(){
 				// A: Create header row first (NOTE: Start at index=1 as headers cols start with 'B')
 				strSheetXml += '<row r="1">';
 				strSheetXml += '<c r="A1" t="s"><v>'+ (data.length + data[0].labels.length) +'</v></c>';
+				columnName = '';
 				for (var idx=1; idx<=data[0].labels.length; idx++) {
-					// FIXME: Max cols is 52
-					strSheetXml += '<c r="'+ ( idx < 26 ? LETTERS[idx] : 'A'+LETTERS[idx%LETTERS.length] ) +'1" t="s">'; // NOTE: use `t="s"` for label cols!
+					columnName = generateExcelColName(columnName, idx);
+					strSheetXml += '<c r="'+ columnName +'1" t="s">'; // NOTE: use `t="s"` for label cols!
 					strSheetXml += '<v>'+ (idx-1) +'</v>';
 					strSheetXml += '</c>';
 				}
 				strSheetXml += '</row>';
 
 				// B: Add data row(s)
+				columnNameForRow = '';
 				data.forEach(function(row,idx){
 					// Leading col is reserved for the label, so hard-code it, then loop over col values
 					strSheetXml += '<row r="'+ (idx+2) +'">';
@@ -1765,7 +1767,8 @@ var PptxGenJS = function(){
 					strSheetXml += '<v>'+ (data[0].values.length + idx + 1) +'</v>';
 					strSheetXml += '</c>';
 					row.values.forEach(function(val,idy){
-						strSheetXml += '<c r="'+ ( (idy+1) < 26 ? LETTERS[(idy+1)] : 'A'+LETTERS[(idy+1)%LETTERS.length] ) +''+ (idx+2) +'">';
+						columnNameForRow = generateExcelColName(columnNameForRow, idy+1);
+						strSheetXml += '<c r="'+ columnNameForRow +''+ (idx+2) +'">';
 						strSheetXml += '<v>'+ val +'</v>';
 						strSheetXml += '</c>';
 					});
@@ -2552,6 +2555,33 @@ var PptxGenJS = function(){
 		return placeholder;
 	};
 
+	/**
+	 * @param {String} Previous column name
+	 * @param {Number} Index of iteration
+	 * @return {String} Column name
+	 */
+	function generateExcelColName(char, idx) {
+		var OFFSET = 25;
+		var ALPHABET_OFFSET = 64;
+
+		if(!char) {
+			char = String.fromCharCode(idx + ALPHABET_OFFSET);
+		}
+
+		if(char === 'Z') {
+			return String.fromCharCode(char.charCodeAt() - OFFSET) + String.fromCharCode(char.charCodeAt() - OFFSET);
+		} else {
+			var lastChar = char.slice(-1);
+	    	var sub = char.slice(0, -1);
+	    	if(lastChar === 'Z') {
+	    		return generateExcelColName(sub) + String.fromCharCode(lastChar.charCodeAt() - OFFSET);
+	    	} else {
+	    		return sub + String.fromCharCode(lastChar.charCodeAt() + 1);
+	    	}
+		}
+		return char;
+	}
+
 	/* =======================================================================================================
 	|
 	#     #  #     #  #             #####
@@ -2575,12 +2605,8 @@ var PptxGenJS = function(){
 		function getExcelColName(length) {
 			var strName = '';
 
-			if ( length <= 26 ) {
-				strName = LETTERS[length];
-			}
-			else {
-				strName += LETTERS[ Math.floor(length/LETTERS.length)-1 ];
-				strName += LETTERS[ (length % LETTERS.length) ];
+			for(var i = 0; i <= length; i++) {
+				strName = generateExcelColName(strName, i);
 			}
 
 			return strName;
