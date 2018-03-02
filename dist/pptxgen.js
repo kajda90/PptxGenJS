@@ -63,7 +63,7 @@ if ( NODEJS ) {
 var PptxGenJS = function(){
 	// CONSTANTS
 	var APP_VER = "1.8.0-beta";
-	var APP_REL = "20171114";
+	var APP_REL = "20180302";
 	//
 	var MASTER_OBJECTS = {
 		'chart': { name:'chart' },
@@ -2105,9 +2105,14 @@ var PptxGenJS = function(){
 		// NOTE: Dont use short-circuit eval here as value c/b "0" (zero) etc.!
 		if ( typeof inStr === 'undefined' || inStr == null ) return "";
 		if ( typeof inStr !== 'string') return inStr;
-		return inStr.replace(/["'<>\\&]/gim, function (i) {
+		// According to https://www.w3.org/TR/xml/ we should filter out any characters which don't match allowed character range:
+		// Char ::= #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF]
+		// and maybe "compatibility characters" too. Currently, only Vertical Tab (0x0B) is converted to space.
+		var sanitized = inStr.replace(/\x0B/gm, ' ')
+		return sanitized.replace(/["'<>\\&]/gim, function (i) {
 			return '&#' + i.charCodeAt(0) + ';';
 		})
+
 	}
 
 	function createHyperlinkRels(inText, slideRels) {
