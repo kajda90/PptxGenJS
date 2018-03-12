@@ -1759,12 +1759,12 @@ var PptxGenJS = function(){
 				strSheetXml += '</row>';
 
 				// B: Add data row(s)
-				columnNameForRow = '';
 				data.forEach(function(row,idx){
+					columnNameForRow = '';
 					// Leading col is reserved for the label, so hard-code it, then loop over col values
 					strSheetXml += '<row r="'+ (idx+2) +'">';
 					strSheetXml += '<c r="A'+ (idx+2) +'" t="s">';
-					strSheetXml += '<v>'+ (data[0].values.length + idx + 1) +'</v>';
+					strSheetXml += '<v>'+ (data[0].values.length + idx) +'</v>';
 					strSheetXml += '</c>';
 					row.values.forEach(function(val,idy){
 						columnNameForRow = generateExcelColName(columnNameForRow, idy+1);
