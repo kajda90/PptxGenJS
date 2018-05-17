@@ -1168,7 +1168,7 @@ var PptxGenJS = function(){
 						strSlideXml += '<p:pic>';
 						strSlideXml += '  <p:nvPicPr>'
 						strSlideXml += '    <p:cNvPr id="'+ (idx + 2) +'" name="Object '+ (idx + 1) +'" descr="'+ slideItemObj.image +'">';
-						if ( slideItemObj.hyperlink ) strSlideXml += '<a:hlinkClick r:id="rId'+ slideItemObj.hyperlink.rId +'" tooltip="'+ (slideItemObj.hyperlink.tooltip ? decodeXmlEntities(slideItemObj.hyperlink.tooltip) : '') +'"/>';
+						if ( slideItemObj.hyperlink ) strSlideXml += '<a:hlinkClick r:id="rId'+ slideItemObj.hyperlink.rId +'" tooltip="'+ (slideItemObj.hyperlink.tooltip ? encodeXmlEntities(slideItemObj.hyperlink.tooltip) : '') +'"/>';
 						strSlideXml += '    </p:cNvPr>';
 						strSlideXml += '    <p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr><p:nvPr' + (slideItemObj.options.preserve ? ' userDrawn="1"' : '') + '/>';
 						strSlideXml += '  </p:nvPicPr>';
@@ -1475,7 +1475,7 @@ var PptxGenJS = function(){
 				else if ( opts.hyperlink.url ) {
 					// FIXME-20170410: FUTURE-FEATURE: color (link is always blue in Keynote and PPT online, so usual text run above isnt honored for links..?)
 					//strXml += '<a:uFill>'+ genXmlColorSelection('0000FF') +'</a:uFill>'; // Breaks PPT2010! (Issue#74)
-					strXml += '<a:hlinkClick r:id="rId'+ opts.hyperlink.rId +'" invalidUrl="" action="" tgtFrame="" tooltip="'+ (opts.hyperlink.tooltip ? decodeXmlEntities(opts.hyperlink.tooltip) : '') +'" history="1" highlightClick="0" endSnd="0"/>';
+					strXml += '<a:hlinkClick r:id="rId'+ opts.hyperlink.rId +'" invalidUrl="" action="" tgtFrame="" tooltip="'+ (opts.hyperlink.tooltip ? encodeXmlEntities(opts.hyperlink.tooltip) : '') +'" history="1" highlightClick="0" endSnd="0"/>';
 				}
 			}
 
@@ -1691,10 +1691,10 @@ var PptxGenJS = function(){
 					strSharedStrings += '<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="'+ (data[0].labels.length + data.length + 1) +'" uniqueCount="'+ (data[0].labels.length + data.length +1) +'">'
 
 					// A: Add Labels
-					data[0].labels.forEach(function(label,idx){ strSharedStrings += '<si><t>'+ label +'</t></si>'; });
+					data[0].labels.forEach(function(label,idx){ strSharedStrings += '<si><t>'+ encodeXmlEntities(label) +'</t></si>'; });
 
 					// B: Add Series
-					data.forEach(function(objData,idx){ strSharedStrings += '<si><t>'+ (objData.name || ' ') +'</t></si>'; });
+					data.forEach(function(objData,idx){ strSharedStrings += '<si><t>'+ encodeXmlEntities(objData.name || ' ') +'</t></si>'; });
 
 					// C: Add 'blank' for A1
 					strSharedStrings += '<si><t xml:space="preserve"></t></si>';
@@ -2101,7 +2101,7 @@ var PptxGenJS = function(){
 	/**
 	 * DESC: Replace special XML characters with HTML-encoded strings
 	 */
-	function decodeXmlEntities(inStr) {
+	function encodeXmlEntities(inStr) {
 		// NOTE: Dont use short-circuit eval here as value c/b "0" (zero) etc.!
 		if ( typeof inStr === 'undefined' || inStr == null ) return "";
 		if ( typeof inStr !== 'string') return inStr;
@@ -2136,7 +2136,7 @@ var PptxGenJS = function(){
 						type: 'hyperlink',
 						data: 'dummy',
 						rId:  intRelId,
-						Target: decodeXmlEntities(text.options.hyperlink.url)
+						Target:encodeXmlEntities(text.options.hyperlink.url)
 					});
 					text.options.hyperlink.rId = intRelId;
 				}
@@ -2697,7 +2697,7 @@ var PptxGenJS = function(){
 					strXml += '  <c:tx>';
 					strXml += '    <c:strRef>';
 					strXml += '      <c:f>Sheet1!$A$'+ (idx+2) +'</c:f>';
-					strXml += '      <c:strCache><c:ptCount val="1"/><c:pt idx="0"><c:v>'+ decodeXmlEntities(obj.name) +'</c:v></c:pt></c:strCache>';
+					strXml += '      <c:strCache><c:ptCount val="1"/><c:pt idx="0"><c:v>'+encodeXmlEntities(obj.name) +'</c:v></c:pt></c:strCache>';
 					strXml += '    </c:strRef>';
 					strXml += '  </c:tx>';
 
@@ -2783,7 +2783,7 @@ var PptxGenJS = function(){
 					strXml += '    <c:f>Sheet1!'+ '$B$1:$'+ getExcelColName(obj.labels.length) +'$1' +'</c:f>';
 					strXml += '    <c:strCache>';
 					strXml += '	     <c:ptCount val="'+ obj.labels.length +'"/>';
-					obj.labels.forEach(function(label,idx){ strXml += '<c:pt idx="'+ idx +'"><c:v>'+ decodeXmlEntities(label) +'</c:v></c:pt>'; });
+					obj.labels.forEach(function(label,idx){ strXml += '<c:pt idx="'+ idx +'"><c:v>'+ encodeXmlEntities(label) +'</c:v></c:pt>'; });
 					strXml += '    </c:strCache>';
 					strXml += '  </c:strRef>';
 					strXml += '</c:cat>';
@@ -2967,7 +2967,7 @@ var PptxGenJS = function(){
 				strXml += '      <c:f>Sheet1!$A$2</c:f>';
 				strXml += '      <c:strCache>';
 				strXml += '        <c:ptCount val="1"/>';
-				strXml += '        <c:pt idx="0"><c:v>'+ decodeXmlEntities(obj.name) +'</c:v></c:pt>';
+				strXml += '        <c:pt idx="0"><c:v>'+ encodeXmlEntities(obj.name) +'</c:v></c:pt>';
 				strXml += '      </c:strCache>';
 				strXml += '    </c:strRef>';
 				strXml += '  </c:tx>';
@@ -3047,7 +3047,7 @@ var PptxGenJS = function(){
 				strXml += '    <c:f>Sheet1!'+ '$B$1:$'+ getExcelColName(obj.labels.length) +'$1' +'</c:f>';
 				strXml += '    <c:strCache>';
 				strXml += '	     <c:ptCount val="'+ obj.labels.length +'"/>';
-				obj.labels.forEach(function(label,idx){ strXml += '<c:pt idx="'+ idx +'"><c:v>'+ decodeXmlEntities(label) +'</c:v></c:pt>'; });
+				obj.labels.forEach(function(label,idx){ strXml += '<c:pt idx="'+ idx +'"><c:v>'+ encodeXmlEntities(label) +'</c:v></c:pt>'; });
 				strXml += '    </c:strCache>';
 				strXml += '  </c:strRef>';
 				strXml += '</c:cat>';
@@ -3175,7 +3175,7 @@ var PptxGenJS = function(){
 		strXml += gObjPptxGenerators.colorToXml(opts.color || '000000');
 		strXml += '        <a:latin typeface="'+ (opts.fontFace || 'Arial') +'"/>';
 		strXml += '      </a:rPr>';
-		strXml += '      <a:t>'+ (decodeXmlEntities(opts.title) || '') +'</a:t>';
+		strXml += '      <a:t>'+ encodeXmlEntities((opts.title) || '') +'</a:t>';
 		strXml += '    </a:r>';
 		strXml += '  </a:p>';
 		strXml += '  </c:rich>';
@@ -3424,7 +3424,7 @@ var PptxGenJS = function(){
 		if ( parsedText.length > 1 ) {
 			var outTextData = '';
 			for ( var i = 0, total_size_i = parsedText.length; i < total_size_i; i++ ) {
-				outTextData += openTag + startInfo+ '<a:t>' + decodeXmlEntities(parsedText[i]);
+				outTextData += openTag + startInfo+ '<a:t>' + encodeXmlEntities(parsedText[i]);
 				// Stop/Start <p>aragraph as long as there is more lines ahead (otherwise its closed at the end of this function)
 				if ( (i + 1) < total_size_i ) outTextData += (opts.breakLine ? CRLF : '') + '</a:t>' + closeTag;
 			}
@@ -3433,7 +3433,7 @@ var PptxGenJS = function(){
 		else {
 			// Handle cases where addText `text` was an array of objects - if a text object doesnt contain a '\n' it still need alignment!
 			// The first pPr-align is done in makeXml - use line countr to ensure we only add subsequently as needed
-			xmlTextRun = ( (opts.align && opts.lineIdx > 0) ? paraProp : '') + openTag + startInfo + '<a:t>' + decodeXmlEntities(text_string);
+			xmlTextRun = ( (opts.align && opts.lineIdx > 0) ? paraProp : '') + openTag + startInfo + '<a:t>' + encodeXmlEntities(text_string);
 		}
 
 		// Return paragraph with text run
@@ -3743,10 +3743,10 @@ var PptxGenJS = function(){
 	function makeXmlCore() {
 		var strXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+CRLF;
 		strXml += '<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmitype="http://purl.org/dc/dcmitype/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">';
-		strXml += '<dc:title>'+ decodeXmlEntities(gObjPptx.title) +'</dc:title>';
-		strXml += '<dc:subject>'+ decodeXmlEntities(gObjPptx.subject) +'</dc:subject>';
-		strXml += '<dc:creator>'+ decodeXmlEntities(gObjPptx.author) +'</dc:creator>';
-		strXml += '<cp:lastModifiedBy>'+ decodeXmlEntities(gObjPptx.author) +'</cp:lastModifiedBy>';
+		strXml += '<dc:title>'+encodeXmlEntities(gObjPptx.title) +'</dc:title>';
+		strXml += '<dc:subject>'+encodeXmlEntities(gObjPptx.subject) +'</dc:subject>';
+		strXml += '<dc:creator>'+encodeXmlEntities(gObjPptx.author) +'</dc:creator>';
+		strXml += '<cp:lastModifiedBy>'+encodeXmlEntities(gObjPptx.author) +'</cp:lastModifiedBy>';
 		strXml += '<cp:revision>'+ gObjPptx.revision +'</cp:revision>';
 		strXml += '<dcterms:created xsi:type="dcterms:W3CDTF">'+ new Date().toISOString() +'</dcterms:created>';
 		strXml += '<dcterms:modified xsi:type="dcterms:W3CDTF">'+ new Date().toISOString() +'</dcterms:modified>';
@@ -4199,7 +4199,7 @@ var PptxGenJS = function(){
 					strSlideXml += '<p:pic>';
 					strSlideXml += '  <p:nvPicPr>'
 					strSlideXml += '    <p:cNvPr id="'+ (idx + 2) +'" name="Object '+ (idx + 1) +'" descr="'+ slideObj.image +'">';
-					if ( slideObj.hyperlink ) strSlideXml += '<a:hlinkClick r:id="rId'+ slideObj.hyperlink.rId +'" tooltip="'+ (slideObj.hyperlink.tooltip ? decodeXmlEntities(slideObj.hyperlink.tooltip) : '') +'"/>';
+					if ( slideObj.hyperlink ) strSlideXml += '<a:hlinkClick r:id="rId'+ slideObj.hyperlink.rId +'" tooltip="'+ (slideObj.hyperlink.tooltip ? encodeXmlEntities(slideObj.hyperlink.tooltip) : '') +'"/>';
 					strSlideXml += '    </p:cNvPr>';
 					strSlideXml += '    <p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr>';
 
